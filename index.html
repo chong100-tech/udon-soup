@@ -242,9 +242,8 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
-                スタート後、8秒間のカウントダウンのあとに具材が落ちてきます！<br>
-                レーンに一致する具材をタップして完走しよう。<br>
-                MISSが20回に達するとゲームオーバーです。
+                8秒のカウントダウン後、約2分19秒の曲に合わせて具材が流れます！<br>
+                <b>MISSが20回</b>に達する前に、最後まで生き残って完走しよう！
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
@@ -259,30 +258,39 @@
 
     <script>
         const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
-        
-        // カウントダウン8秒 ＋ 落下時間2秒 ＝ 10秒目に最初のノーツが判定ラインに到達
-        const START_DELAY = 10.0; 
+        const START_DELAY = 8.0; // 8秒のカウントダウン後に最初のノーツがスタート
 
-        const RAW_TIMINGS = [
+        // 曲の長さ（約2分19秒 ＝ 139秒）に合わせて、うどんかぞえうたの具材パターンをループ展開
+        const basePattern = [
             { t: 0.0, lane: 0, text: "きつね" },
-            { t: 1.2, lane: 1, text: "たぬき" },
-            { t: 2.4, lane: 2, text: "てんぷら" },
-            { t: 3.6, lane: 3, text: "たぬき" }, 
-            { t: 4.8, lane: 3, text: "つきみ" },
-            { t: 6.0, lane: 4, text: "おにく" },
-            { t: 7.5, lane: 0, text: "おにく" }, 
-            { t: 9.0, lane: 0, text: "きつね" },
-            { t: 10.2, lane: 1, text: "たぬき" },
-            { t: 11.4, lane: 2, text: "てんぷら" },
-            { t: 12.6, lane: 3, text: "つきみ" },
-            { t: 13.8, lane: 4, text: "おにく" },
-            { t: 15.5, lane: 1, text: "きつね" }, 
-            { t: 16.7, lane: 1, text: "たぬき" },
-            { t: 17.9, lane: 2, text: "てんぷら" },
-            { t: 19.5, lane: 4, text: "おにく" },
-            { t: 21.0, lane: 0, text: "きつね" },
-            { t: 22.5, lane: 3, text: "つきみ" }
+            { t: 1.5, lane: 1, text: "たぬき" },
+            { t: 3.0, lane: 2, text: "てんぷら" },
+            { t: 4.5, lane: 3, text: "たぬき" }, // ダミー
+            { t: 6.0, lane: 3, text: "つきみ" },
+            { t: 7.5, lane: 4, text: "おにく" },
+            { t: 9.5, lane: 0, text: "おにく" }, // ダミー
+            { t: 11.0, lane: 0, text: "きつね" },
+            { t: 12.5, lane: 1, text: "たぬき" },
+            { t: 14.0, lane: 2, text: "てんぷら" },
+            { t: 15.5, lane: 3, text: "つきみ" },
+            { t: 17.0, lane: 4, text: "おにく" }
         ];
+
+        // 2分19秒（約139秒）の間、リズムよく具材が繰り返し落ちてくるように自動生成
+        let RAW_TIMINGS = [];
+        for (let i = 0; i < 10; i++) {
+            basePattern.forEach(note => {
+                RAW_TIMINGS.push({
+                    t: note.t + (i * 13.5),
+                    lane: note.lane,
+                    text: note.text
+                });
+            });
+        }
+        // 最後のフィナーレ用ノーツ
+        RAW_TIMINGS.push({ t: 136.0, lane: 0, text: "きつね" });
+        RAW_TIMINGS.push({ t: 137.0, lane: 2, text: "てんぷら" });
+        RAW_TIMINGS.push({ t: 138.0, lane: 4, text: "おにく" });
 
         const MAX_MISS_ALLOWED = 20;
         let score = 0, combo = 0, missCount = 0;
@@ -467,9 +475,9 @@
             const detailEl = document.getElementById('res-detail');
 
             if (isClear) {
-                titleEl.innerText = '🎉 クリア！おめでとう！ 🎉';
+                titleEl.innerText = '🎉 曲を完走！おめでとう！ 🎉';
                 titleEl.style.color = '#ffc107';
-                detailEl.innerText = `すべての具材を完走しました！\nMISS回数: ${missCount}回`;
+                detailEl.innerText = `見事に最後まで歌いきりました！\nMISS回数: ${missCount}回`;
             } else {
                 titleEl.innerText = '😭 残念！もう一度チャレンジしてね！ 😭';
                 titleEl.style.color = '#f44336';
