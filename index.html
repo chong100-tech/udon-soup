@@ -12,7 +12,6 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* 画面全体のスクロールを許可する設定 */
         html, body {
             width: 100%;
             height: 100%;
@@ -31,7 +30,6 @@
             touch-action: manipulation;
         }
 
-        /* ゲーム画面本体（縦長コンテナ） */
         #game-container {
             position: relative;
             width: 100%;
@@ -63,7 +61,7 @@
 
         .stage-container {
             position: relative;
-            height: 170px;
+            height: 180px;
             background: radial-gradient(circle, #3a4454 0%, #1c222b 100%);
             display: flex;
             flex-direction: column;
@@ -81,32 +79,47 @@
             border: 4px solid #b0b0b0;
             display: flex; align-items: center; justify-content: center;
             z-index: 2;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
         .bowl-text { font-size: 13px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
+        
         .dancers-row {
-            position: absolute; bottom: 22px;
+            position: absolute; bottom: 25px;
             display: flex; justify-content: space-around;
             width: 95%; z-index: 3;
         }
-        .dancer { display: flex; flex-direction: column; align-items: center; }
+        .dancer {
+            display: flex; flex-direction: column; align-items: center;
+            transform-origin: bottom center;
+        }
         .dancer-avatar {
             width: 38px; height: 38px; border-radius: 50%;
             background: #fff; border: 2px solid var(--primary);
             display: flex; align-items: center; justify-content: center; font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
         }
         .dancer-name {
-            font-size: 8px; margin-top: 2px; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 4px;
+            font-size: 8px; margin-top: 2px; background: rgba(0,0,0,0.7); padding: 1px 4px; border-radius: 4px;
+            white-space: nowrap;
         }
-        .dancing { animation: danceStep 0.5s infinite alternate ease-in-out; }
-        @keyframes danceStep {
-            0% { transform: translateY(0) rotate(-5deg); }
-            100% { transform: translateY(-8px) rotate(5deg); }
+
+        /* CM風の軽快なダンスアニメーション */
+        .dancing {
+            animation: cmDance 0.4s infinite alternate ease-in-out;
         }
-        .jump { animation: jumpAnim 0.3s ease-out; }
+        @keyframes cmDance {
+            0% { transform: translateY(0) rotate(-8deg) scaleX(0.95); }
+            100% { transform: translateY(-12px) rotate(8deg) scaleX(1.05); }
+        }
+
+        /* ノーツヒット時の大ジャンプ */
+        .jump {
+            animation: jumpAnim 0.3s ease-out;
+        }
         @keyframes jumpAnim {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-22px) scale(1.2); }
-            100% { transform: translateY(0); }
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-25px) scale(1.25) rotate(15deg); }
+            100% { transform: translateY(0) scale(1); }
         }
         
         .play-area {
@@ -130,11 +143,13 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; font-weight: bold; color: #fff;
             border: 2px solid rgba(255,255,255,0.8); z-index: 5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
         #feedback {
             position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
             font-size: 28px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0;
             transition: opacity 0.1s; text-align: center; white-space: nowrap;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
         
         .control-panel {
@@ -149,6 +164,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer;
             user-select: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .hit-btn:active, .hit-btn.pressed { transform: scale(0.92); background: #bf360c; }
         
@@ -164,6 +180,7 @@
             font-size: 18px; font-weight: bold; border-radius: 30px;
             cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
+        .btn-main:active { transform: scale(0.95); }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -177,11 +194,11 @@
 
         <div class="stage-container">
             <div class="dancers-row">
-                <div class="dancer"><div class="dancer-avatar">🦊</div><div class="dancer-name">コンちゃん</div></div>
-                <div class="dancer"><div class="dancer-avatar">🦝</div><div class="dancer-name">ポン子</div></div>
-                <div class="dancer"><div class="dancer-avatar">🍤</div><div class="dancer-name">えび代</div></div>
-                <div class="dancer"><div class="dancer-avatar">🥚</div><div class="dancer-name">つき美</div></div>
-                <div class="dancer"><div class="dancer-avatar">🥩</div><div class="dancer-name">マツザカ</div></div>
+                <div class="dancer"><div class="dancer-avatar">🦊</div><div class="dancer-name">きつね</div></div>
+                <div class="dancer"><div class="dancer-avatar">🦝</div><div class="dancer-name">たぬき</div></div>
+                <div class="dancer"><div class="dancer-avatar">🍤</div><div class="dancer-name">てんぷら</div></div>
+                <div class="dancer"><div class="dancer-avatar">🥚</div><div class="dancer-name">つきみ</div></div>
+                <div class="dancer"><div class="dancer-avatar">🥩</div><div class="dancer-name">おにく</div></div>
             </div>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
         </div>
@@ -203,7 +220,7 @@
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:13px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
                 キーボード [D] [F] [J] [K] またはタップ！<br>
-                20回MISSする前に最後まで完走しよう！
+                動物たちと一緒に楽しく完走しよう！
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
