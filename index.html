@@ -265,7 +265,7 @@
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 15px;">
                 レーンに一致する具材アイコンをタップしよう！<br>
-                黄色い線の中央に合わせてタップ！<br>
+                黄色い線に合わせて正確にタップ！<br>
                 <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
@@ -323,7 +323,8 @@
         const MAX_MISS_ALLOWED = 20;
         let score = 0, combo = 0, missCount = 0;
         let perfectCount = 0, goodCount = 0;
-        let gameActive = false, startTime = 0;
+        let gameActive = false, isCountingDown = false;
+        let startTime = 0;
         let activeNotes = [], countdownTimer = null, animId = null;
         
         const defaultAudio = new Audio('udon.mp3');
@@ -331,7 +332,6 @@
         
         const lanes = document.querySelectorAll('.lane');
 
-        // 効果音生成関数
         let audioCtx = null;
         function playSound(type) {
             try {
@@ -398,7 +398,7 @@
                 return {
                     id: index,
                     el: el,
-                    done: false, // 判定が終わったらtrue
+                    removed: false,
                     lane: item.lane,
                     type: item.type,
                     targetTime: targetTime
@@ -413,6 +413,8 @@
             let timeLeft = 8;
             cdEl.innerText = timeLeft;
 
+            isCountingDown = true; // カウントダウン中フラグをON
+
             if (countdownTimer) clearInterval(countdownTimer);
             countdownTimer = setInterval(() => {
                 timeLeft--;
@@ -420,6 +422,7 @@
                     cdEl.innerText = timeLeft;
                 } else {
                     cdEl.innerText = "START!";
+                    isCountingDown = false; // カウントダウン終了！プレイ開始
                     setTimeout(() => cdEl.classList.add('hidden'), 600);
                     clearInterval(countdownTimer);
                 }
@@ -435,14 +438,12 @@
             const elapsed = (performance.now() - startTime) / 1000;
             const playAreaHeight = lanes[0].clientHeight;
             const fallDuration = 2.0;
-
-            // 判定ライン（黄色の線）の底からのピクセル位置
             const targetLineBottom = 75; 
 
             let allCleared = true;
 
             activeNotes.forEach((obj) => {
-                if (!obj.done) {
+                if (!obj.removed) {
                     allCleared = false;
                     const dropStartTime = obj.targetTime - fallDuration;
 
@@ -451,19 +452,19 @@
                         const totalTravel = playAreaHeight - targetLineBottom;
                         const currentTop = progress * totalTravel;
 
-                        if (progress <= 1.35) {
+                        if (progress <= 1.3) {
                             obj.el.style.top = currentTop + 'px';
                         }
                     }
 
-                    // おかずの下端が判定ラインを完全に通り過ぎて画面下に落ちた場合（見逃しMISS）
                     const targetLinePixelFromTop = playAreaHeight - targetLineBottom;
                     const noteTop = parseFloat(obj.el.style.top) || -50;
-                    const noteBottom = noteTop + 44; // ノーツの高さ44px
+                    const noteBottom = noteTop + 44;
 
-                    if (noteBottom > targetLinePixelFromTop + 45) {
-                        obj.done = true;
-                        obj.el.remove(); // 即座に削除
+                    if (noteBottom > targetLinePixelFromTop + 35) {
+                        obj.removed = true;
+                        obj.el.remove();
+                        
                         if (obj.type === obj.lane) {
                             handleMiss();
                         }
@@ -485,37 +486,35 @@
         }
 
         function judgeLane(laneIndex) {
-            if (!gameActive) return;
+            // カウントダウン中、またはゲーム終了時はボタンを押しても何も反応させない
+            if (!gameActive || isCountingDown) return;
             
             const playAreaHeight = lanes[0].clientHeight;
-            const targetLinePixelFromTop = playAreaHeight - 75; // 黄色い線の位置（上からのピクセル）
+            const targetLinePixelFromTop = playAreaHeight - 75; 
 
             let hitFound = false;
 
-            // そのレーンにある、まだ判定されていない最初のおかずをチェック
             for (let obj of activeNotes) {
-                if (obj.lane === laneIndex && !obj.done) {
+                if (obj.lane === laneIndex && !obj.removed) {
                     const noteTop = parseFloat(obj.el.style.top) || -50;
-                    const noteCenter = noteTop + 22; // おかずの中央のピクセル位置
-                    const targetCenter = targetLinePixelFromTop + 3; // 黄色い線の中央ピクセル位置
+                    const noteCenter = noteTop + 22; 
+                    const targetCenter = targetLinePixelFromTop + 3; 
 
-                    const distance = Math.abs(noteCenter - targetCenter);
+                    const distance = noteCenter - targetCenter; 
+                    const absDistance = Math.abs(distance);
 
-                    // 判定範囲内（線に触れている状態：±45ピクセル以内）にいるか
-                    if (distance <= 45) {
+                    if (absDistance <= 40) {
                         hitFound = true;
-                        obj.done = true; // 処理済みにして完全ロック
-                        obj.el.remove(); // 即座に画面から消去（底に落ちてからの二重MISSを100%防止）
+                        obj.removed = true; 
+                        obj.el.remove();    
 
                         if (obj.type === laneIndex) {
-                            // 🌟 測定ルール：線の中央に来たときのみ PERFECT (±12ピクセル以内)
-                            if (distance <= 12) {
+                            if (absDistance <= 12) {
                                 score += 300; combo++;
                                 perfectCount++;
                                 showFeedback('PERFECT!', '#ffeb3b');
                                 playSound('perfect');
                             } else {
-                                // 🌟 測定ルール：中央ではないが線に触れているとき GOOD
                                 score += 100; combo++;
                                 goodCount++;
                                 showFeedback('GOOD', '#8bc34a');
@@ -524,15 +523,13 @@
                             document.getElementById('score').innerText = score;
                             document.getElementById('combo').innerText = combo;
                         } else {
-                            // 違うおかずが来ているレーンで押した場合
                             handleMiss();
                         }
-                        break; // 1タップにつき1つのノートのみ処理
+                        break; 
                     }
                 }
             }
 
-            // 近くにおかずが無いのにタップした場合（おてつきMISS）
             if (!hitFound) {
                 handleMiss();
             }
@@ -558,6 +555,7 @@
 
         function endGame(isClear) {
             gameActive = false;
+            isCountingDown = false;
             cancelAnimationFrame(animId);
             if (countdownTimer) clearInterval(countdownTimer);
             defaultAudio.pause();
@@ -593,7 +591,7 @@
         });
 
         document.getElementById('start-btn').addEventListener('click', startGame);
-        document.getElementById('restart-btn', sectoralYager|false);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
     </script>
 </body>
 </html>
