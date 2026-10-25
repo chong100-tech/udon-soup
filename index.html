@@ -265,7 +265,7 @@
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 15px;">
                 レーンに一致する具材アイコンをタップしよう！<br>
-                黄色い線に合わせて正確にタップ！<br>
+                毎回ランダムでおかずが登場します。<br>
                 <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
@@ -290,37 +290,8 @@
         
         const START_DELAY = 10.0; 
         const TOTAL_GAME_DURATION = 135.0; // 8秒カウント込みで2分15秒
-
-        const basePattern = [
-            { t: 0.0, lane: 0, type: 0 },
-            { t: 1.5, lane: 1, type: 1 },
-            { t: 3.0, lane: 2, type: 2 },
-            { t: 4.5, lane: 3, type: 1 }, 
-            { t: 6.0, lane: 3, type: 3 },
-            { t: 7.5, lane: 4, type: 4 },
-            { t: 9.5, lane: 0, type: 4 }, 
-            { t: 11.0, lane: 0, type: 0 },
-            { t: 12.5, lane: 1, type: 1 }
-        ];
-
-        let RAW_TIMINGS = [];
-        for (let i = 0; i < 12; i++) {
-            basePattern.forEach(note => {
-                let timing = note.t + (i * 11.0);
-                if (timing < 130.0) {
-                    RAW_TIMINGS.push({
-                        t: timing,
-                        lane: note.lane,
-                        type: note.type
-                    });
-                }
-            });
-        }
-        RAW_TIMINGS.push({ t: 131.0, lane: 0, type: 0 });
-        RAW_TIMINGS.push({ t: 132.2, lane: 1, type: 1 });
-        RAW_TIMINGS.push({ t: 133.4, lane: 2, type: 2 });
-
         const MAX_MISS_ALLOWED = 20;
+
         let score = 0, combo = 0, missCount = 0;
         let perfectCount = 0, goodCount = 0;
         let gameActive = false, isCountingDown = false;
@@ -373,6 +344,26 @@
             }
         }
 
+        // 毎回完全にランダムな譜面を生成する関数
+        function generateRandomTimings() {
+            let timings = [];
+            let currentTime = 0.0;
+            
+            // 約125秒間にわたってランダムなおかずを配置
+            while (currentTime < 125.0) {
+                const randomLane = Math.floor(Math.random() * 5); // 0〜4レーン
+                const randomType = Math.floor(Math.random() * 5); // 0〜4（狐、たぬき、天ぷら、月見、肉）
+                timings.push({
+                    t: currentTime,
+                    lane: randomLane,
+                    type: randomType
+                });
+                // 0.9秒〜1.6秒おきにランダムに出現
+                currentTime += 0.9 + Math.random() * 0.7;
+            }
+            return timings;
+        }
+
         function startGame() {
             score = 0; 
             combo = 0; 
@@ -389,7 +380,10 @@
 
             document.querySelectorAll('.note').forEach(el => el.remove());
 
-            activeNotes = RAW_TIMINGS.map((item, index) => {
+            // 毎回完全ランダムなタイミング＆種類でノートを作成
+            const rawTimings = generateRandomTimings();
+
+            activeNotes = rawTimings.map((item, index) => {
                 const targetTime = START_DELAY + item.t;
                 const el = document.createElement('div');
                 el.className = 'note';
@@ -461,10 +455,10 @@
                     const noteTop = parseFloat(obj.el.style.top) || -50;
                     const noteBottom = noteTop + 44;
 
-                    // 完全に線の下を通り過ぎたとき（見逃しMISS）
-                    if (noteBottom > targetLinePixelFromTop + 50) {
-                        obj.removed = true; // ★二重判定防止フラグをON
-                        obj.el.remove();    // ★即座にDOM要素を完全削除
+                    // 完全に下まで通り過ぎた場合（見逃しMISS）
+                    if (noteBottom > targetLinePixelFromTop + 60) {
+                        obj.removed = true; // 処理済みにして二度と判定されないようにする
+                        obj.el.remove();    // 即時削除
                         
                         if (obj.type === obj.lane) {
                             handleMiss();
@@ -503,11 +497,11 @@
                     const distance = noteCenter - targetCenter; 
                     const absDistance = Math.abs(distance);
 
-                    // タップ可能な許容範囲（線に触れている状態：上下に約45px以内）
+                    // 判定範囲内（±45px以内）
                     if (absDistance <= 45) {
                         hitFound = true;
-                        obj.removed = true; // ★判定完了：このおかずへの入力を完全ロック（連打防止）
-                        obj.el.remove();    // ★即座にDOM削除（底でのMISS重複を100%防止）
+                        obj.removed = true; // ★判定完了：即座にロック（連打防止）
+                        obj.el.remove();    // ★即座に削除（底落ちMISSのバグを完全防止）
 
                         if (obj.type === laneIndex) {
                             if (absDistance <= 12) {
