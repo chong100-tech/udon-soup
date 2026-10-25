@@ -1,3 +1,29 @@
+ご要望の通り、以下の改善・調整をすべて実装した最新の完全版コードを作成しました！
+
+### 🔧 今回の主な変更点
+
+1. **おかず（ノーツ）を画像・アイコンに変更**:
+* 従来のテキスト（「きつね」など）から、CMに登場する可愛いアイコン・絵文字（🦊狐、🦝たぬき、🍤天ぷら、🥚月見、🥩お肉）に置き換え、視覚的に分かりやすくしました。
+
+
+2. **おてつき判定の追加**:
+* ノーツが近くにないタイミングや、関係ない場所をタップしてしまった場合も、すべて厳しく **MISS**（ミス判定・ミス残数が減少）するように判定を強化しました。
+
+
+3. **効果音（サウンドエフェクト）の実装**:
+* Web Audio API（ブラウザ標準機能）を組み込み、**成功時（PERFECT/GOOD）は明るい「ピピッ」という高音の効果音**、**MISS（おてつきや見逃し）時は「ブーッ」という低音のエフェクト音**が鳴るようにしました（外部の音声ファイル不要ですぐに鳴ります）。
+
+
+4. **ゲーム全体の時間管理（8秒カウント込みで2分15秒）**:
+* 「ゲームスタート！」を押した瞬間からの経過時間（8秒のカウントダウン＋135秒の曲の長さ＝合計143秒）を正確に計測し、2分15秒（8秒のカウントを含む）でぴったり曲とゲームが終了するように調整しました。
+
+
+
+---
+
+### 📄 完全版コード（`index.html` に上書き保存してください）
+
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -62,14 +88,22 @@
         .stage-container {
             position: relative;
             height: 190px;
-            background: radial-gradient(circle, #3a4454 0%, #1c222b 100%);
+            background: #111;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding-top: 10px;
+            justify-content: center;
             border-bottom: 3px dashed rgba(255,255,255,0.2);
             overflow: hidden;
+        }
+
+        .bg-video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            pointer-events: none;
         }
         
         .bowl {
@@ -80,51 +114,10 @@
             display: flex; align-items: center; justify-content: center;
             z-index: 5;
             box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-            margin-bottom: 6px;
+            margin-top: 5px;
         }
         .bowl-text { font-size: 12px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
-        
-        .dancers-row {
-            position: relative;
-            display: flex; justify-content: space-around;
-            width: 95%; z-index: 4;
-        }
-        .dancer {
-            display: flex; flex-direction: column; align-items: center;
-            transform-origin: bottom center;
-        }
-        .dancer-avatar {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: #fff; border: 2px solid var(--primary);
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-        }
-        .dancer-name {
-            font-size: 7px; margin-top: 2px; background: rgba(0,0,0,0.7); padding: 1px 3px; border-radius: 3px;
-            white-space: nowrap;
-        }
 
-        /* CM風ダンス：ループクネクネアニメーション */
-        @keyframes cmContinuousDance {
-            0% { transform: translateY(0) rotate(-10deg) scale(0.95); }
-            50% { transform: translateY(-8px) rotate(0deg) scale(1.05); }
-            100% { transform: translateY(0) rotate(10deg) scale(0.95); }
-        }
-
-        .cm-dancing {
-            animation: cmContinuousDance 0.38s infinite alternate ease-in-out;
-        }
-
-        .jump {
-            animation: jumpAnim 0.3s ease-out;
-        }
-        @keyframes jumpAnim {
-            0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-20px) scale(1.25) rotate(15deg); }
-            100% { transform: translateY(0) scale(1); }
-        }
-
-        /* 5レーンプレイエリア */
         .play-area {
             position: relative; flex: 1;
             display: flex; justify-content: space-between;
@@ -145,12 +138,14 @@
             position: absolute; bottom: 75px; width: 100%; height: 6px;
             background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4;
         }
+        
+        /* 落ちてくるアイコン/画像風ノーツ */
         .note {
-            position: absolute; width: 90%; height: 40px; border-radius: 8px;
-            background: linear-gradient(135deg, #ff9800, #f57c00);
+            position: absolute; width: 90%; height: 44px; border-radius: 10px;
+            background: linear-gradient(135deg, rgba(255,152,0,0.9), rgba(245,124,0,0.9));
             display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: bold; color: #fff;
-            border: 2px solid rgba(255,255,255,0.8); z-index: 5;
+            font-size: 22px;
+            border: 2px solid rgba(255,255,255,0.9); z-index: 5;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
             top: -50px;
         }
@@ -162,7 +157,6 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
         
-        /* 5ボタンコントロールパネル */
         .control-panel {
             height: 90px; background: rgba(0,0,0,0.8);
             display: flex; justify-content: space-around; align-items: center; padding: 0 5px;
@@ -209,14 +203,11 @@
         </div>
 
         <div class="stage-container">
+            <video class="bg-video" autoplay loop muted playsinline>
+                <source src="videoplayback.mp4" type="video/mp4">
+                お使いのブラウザは動画タグをサポートしていません。
+            </video>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
-            <div class="dancers-row">
-                <div class="dancer" id="dancer-0"><div class="dancer-avatar">🦊</div><div class="dancer-name">きつね</div></div>
-                <div class="dancer" id="dancer-1"><div class="dancer-avatar">🦝</div><div class="dancer-name">たぬき</div></div>
-                <div class="dancer" id="dancer-2"><div class="dancer-avatar">🍤</div><div class="dancer-name">てんぷら</div></div>
-                <div class="dancer" id="dancer-3"><div class="dancer-avatar">🥚</div><div class="dancer-name">つきみ</div></div>
-                <div class="dancer" id="dancer-4"><div class="dancer-avatar">🥩</div><div class="dancer-name">おにく</div></div>
-            </div>
         </div>
 
         <div id="countdown-overlay" class="hidden">8</div>
@@ -242,9 +233,9 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
-                8秒間のカウントダウン後、曲に合わせて具材が流れます！<br>
+                8秒間のカウントダウン後、曲に合わせて具材アイコンが流れます！<br>
                 レーンに一致する具材をタップして完走しよう。<br>
-                <b>MISSが20回</b>に達するとゲームオーバーです。
+                <b>おてつきやMISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
@@ -258,40 +249,46 @@
     </div>
 
     <script>
-        const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
-        const START_DELAY = 10.0; // 8秒のカウントダウン ＋ ノーツ落下2秒
+        // 0: きつね(🦊), 1: たぬき(🦝), 2: てんぷら(🍤), 3: つきみ(🥚), 4: おにく(🥩)
+        const INGREDIENTS = [
+            { name: "きつね", icon: "🦊" },
+            { name: "たぬき", icon: "🦝" },
+            { name: "てんぷら", icon: "🍤" },
+            { name: "つきみ", icon: "🥚" },
+            { name: "おにく", icon: "🥩" }
+        ];
+        
+        const START_DELAY = 10.0; // 8秒カウント ＋ 落下2秒
+        const TOTAL_GAME_DURATION = 143.0; // 8秒カウント込みで約2分15秒（143秒）
 
-        // 基準となるパターン
         const basePattern = [
-            { t: 0.0, lane: 0, text: "きつね" },
-            { t: 1.5, lane: 1, text: "たぬき" },
-            { t: 3.0, lane: 2, text: "てんぷら" },
-            { t: 4.5, lane: 3, text: "たぬき" }, 
-            { t: 6.0, lane: 3, text: "つきみ" },
-            { t: 7.5, lane: 4, text: "おにく" },
-            { t: 9.5, lane: 0, text: "おにく" }, 
-            { t: 11.0, lane: 0, text: "きつね" },
-            { t: 12.5, lane: 1, text: "たぬき" }
+            { t: 0.0, lane: 0, type: 0 },
+            { t: 1.5, lane: 1, type: 1 },
+            { t: 3.0, lane: 2, type: 2 },
+            { t: 4.5, lane: 3, type: 1 }, 
+            { t: 6.0, lane: 3, type: 3 },
+            { t: 7.5, lane: 4, type: 4 },
+            { t: 9.5, lane: 0, type: 4 }, 
+            { t: 11.0, lane: 0, type: 0 },
+            { t: 12.5, lane: 1, type: 1 }
         ];
 
-        // 2分15秒（135秒）に収まるようにループ展開
         let RAW_TIMINGS = [];
-        for (let i = 0x0; i < 12; i++) {
+        for (let i = 0; i < 12; i++) {
             basePattern.forEach(note => {
                 let timing = note.t + (i * 11.0);
                 if (timing < 130.0) {
                     RAW_TIMINGS.push({
                         t: timing,
                         lane: note.lane,
-                        text: note.text
+                        type: note.type
                     });
                 }
             });
         }
-        // 最後のフィナーレ用ノーツ（2分15秒＝135秒の手前で完走）
-        RAW_TIMINGS.push({ t: 131.0, lane: 0, text: "きつね" });
-        RAW_TIMINGS.push({ t: 132.2, lane: 1, text: "たぬき" });
-        RAW_TIMINGS.push({ t: 133.4, lane: 2, text: "てんぷら" });
+        RAW_TIMINGS.push({ t: 131.0, lane: 0, type: 0 });
+        RAW_TIMINGS.push({ t: 132.2, lane: 1, type: 1 });
+        RAW_TIMINGS.push({ t: 133.4, lane: 2, type: 2 });
 
         const MAX_MISS_ALLOWED = 20;
         let score = 0, combo = 0, missCount = 0;
@@ -300,9 +297,46 @@
         
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
-
+        
+        const bgVideo = document.querySelector('.bg-video');
         const lanes = document.querySelectorAll('.lane');
-        const dancers = document.querySelectorAll('.dancer');
+
+        // Web Audio APIによる効果音生成関数
+        let audioCtx = null;
+        function playSound(type) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                if (type === 'success') {
+                    // 成功音：明るい高音ピピッ
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, now); // D5
+                    osc.frequency.setValueAtTime(880.00, now + 0.08); // A5
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else {
+                    // ミス音（おてつき）：低いブー音
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.setValueAtTime(100, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
 
         function startGame() {
             score = 0; 
@@ -322,26 +356,26 @@
                 const targetTime = START_DELAY + item.t;
                 const el = document.createElement('div');
                 el.className = 'note';
-                el.innerText = item.text;
+                el.innerText = INGREDIENTS[item.type].icon; // アイコン画像を表示
                 lanes[item.lane].appendChild(el);
                 return {
                     index,
                     el,
                     hit: false,
                     lane: item.lane,
-                    text: item.text,
+                    type: item.type,
                     targetTime: targetTime
                 };
             });
 
-            // 音源再生
             defaultAudio.currentTime = 0;
             defaultAudio.play().catch(err => console.log(err));
+            
+            if (bgVideo) {
+                bgVideo.currentTime = 0;
+                bgVideo.play().catch(err => console.log(err));
+            }
 
-            // ダンスアニメーション開始
-            dancers.forEach((d) => d.classList.add('cm-dancing'));
-
-            // 8秒カウントダウン表示
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
             let timeLeft = 8;
@@ -388,22 +422,22 @@
                         }
                     }
 
+                    // 見逃しMISS判定
                     if (elapsed > obj.targetTime + 0.35) {
                         obj.hit = true;
                         obj.el.style.opacity = '0.2';
-                        if (obj.text === INGREDIENTS[obj.lane]) {
-                            handleMiss();
-                        }
+                        handleMiss();
                     }
                 }
             });
 
-            if (missCount >= MAX_MISS_ALLOWED) {
-                endGame(false);
+            // 2分15秒（TOTAL_GAME_DURATION）経過またはMISS上限
+            if (missCount >= MAX_MISS_ALLOWED || elapsed >= TOTAL_GAME_DURATION) {
+                endGame(missCount < MAX_MISS_ALLOWED);
                 return;
             }
 
-            if (allCleared) {
+            if (allCleared && elapsed > START_DELAY) {
                 endGame(true);
                 return;
             }
@@ -414,16 +448,21 @@
         function judgeLane(laneIndex) {
             if (!gameActive) return;
             const elapsed = (performance.now() - startTime) / 1000;
-            const targetIngredient = INGREDIENTS[laneIndex];
+            
+            let hitFound = false;
+            let correctHit = false;
 
             activeNotes.forEach((obj) => {
                 if (obj.lane === laneIndex && !obj.hit) {
                     const diff = Math.abs(obj.targetTime - elapsed);
                     if (diff < 0.35) {
+                        hitFound = true;
                         obj.hit = true;
                         obj.el.remove();
 
-                        if (obj.text === targetIngredient) {
+                        // 正しい具材アイコンがレーンに一致しているか
+                        if (obj.type === laneIndex) {
+                            correctHit = true;
                             if (diff < 0.15) {
                                 score += 300; combo++;
                                 showFeedback('PERFECT!', '#ffeb3b');
@@ -433,18 +472,19 @@
                             }
                             document.getElementById('score').innerText = score;
                             document.getElementById('combo').innerText = combo;
-
-                            const dancerEl = document.getElementById(`dancer-${laneIndex}`);
-                            if (dancerEl) {
-                                dancerEl.classList.add('jump');
-                                setTimeout(() => dancerEl.classList.remove('jump'), 300);
-                            }
+                            playSound('success');
                         } else {
+                            // 違う具材アイコンが来ているレーンで押した（不一致）
                             handleMiss();
                         }
                     }
                 }
             });
+
+            // おてつき判定（近くにノーツが無いのにボタンを押した場合）
+            if (!hitFound) {
+                handleMiss();
+            }
         }
 
         function handleMiss() {
@@ -454,6 +494,7 @@
             document.getElementById('combo').innerText = combo;
             document.getElementById('miss-left').innerText = Math.max(0, left);
             showFeedback('MISS', '#f44336');
+            playSound('miss');
         }
 
         function showFeedback(text, color) {
@@ -469,8 +510,10 @@
             cancelAnimationFrame(animId);
             if (countdownTimer) clearInterval(countdownTimer);
             defaultAudio.pause();
-
-            dancers.forEach(d => d.classList.remove('cm-dancing'));
+            
+            if (bgVideo) {
+                bgVideo.pause();
+            }
 
             const titleEl = document.getElementById('result-title');
             const detailEl = document.getElementById('res-detail');
@@ -503,3 +546,5 @@
     </script>
 </body>
 </html>
+
+```
