@@ -1,0 +1,436 @@
+音声ファイルを最初から組み込み、**「ファイル選択ボタン」なしで、リンクやHTMLを開くだけですぐに曲が流れて遊べる状態**にした完成版のコードを作成しました！
+
+### 🌐 人に遊んでもらうためのコツ（スマホ対応）
+
+このファイルをそのままメールやLINEで送ったり、パソコンからスマホに送っても、セキュリティ上スマホ単体では音源がうまく読み込めない場合があります。
+
+そのため、もしお知り合いにスマホやPCで手軽に遊んでもらいたい場合は、以下のどちらかの方法が一番スムーズです：
+
+1. **GitHub Pages や Netlify などの無料サービスにアップロードする**（ネット上に置くだけで専用のURLがもらえ、スマホからそのURLを踏むだけで誰でも遊べるようになります）
+2. **PCで遊んでもらう**（同じフォルダに `udon.mp3` とこの `index.html` を入れてZIPにまとめて渡す）
+
+今回は、**プログラム側にあらかじめ音源の読み込み設定を組み込んだ状態**のコードをご用意しました。
+
+---
+
+### 📄 完全版コード（そのままコピーして `index.html` に保存してください）
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>うどんかぞえうたリズムゲーム</title>
+    <style>
+        :root {
+            --primary: #ff5722;
+            --secondary: #ffc107;
+            --bg-color: #1a1a2e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            max-height: 850px;
+            background: linear-gradient(135deg, #2c3e50, #111);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 4px solid #333;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(0,0,0,0.6);
+            z-index: 10;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .score-box, .combo-box, .miss-box { text-align: center; }
+        .label { font-size: 10px; color: #aaa; }
+        .value { font-size: 18px; font-weight: bold; color: var(--secondary); }
+        .miss-value { font-size: 18px; font-weight: bold; color: #f44336; }
+
+        .stage-container {
+            position: relative;
+            height: 170px;
+            background: radial-gradient(circle, #3a4454 0%, #1c222b 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 3px dashed rgba(255,255,255,0.2);
+            overflow: hidden;
+        }
+        .bowl {
+            position: absolute;
+            bottom: 8px;
+            width: 130px; height: 45px;
+            background: #e0e0e0;
+            border-bottom-left-radius: 65px; border-bottom-right-radius: 65px;
+            border: 4px solid #b0b0b0;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2;
+        }
+        .bowl-text { font-size: 13px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
+        .dancers-row {
+            position: absolute; bottom: 22px;
+            display: flex; justify-content: space-around;
+            width: 95%; z-index: 3;
+        }
+        .dancer { display: flex; flex-direction: column; align-items: center; }
+        .dancer-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: #fff; border: 2px solid var(--primary);
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .dancer-name {
+            font-size: 8px; margin-top: 2px; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 4px;
+        }
+        .dancing { animation: danceStep 0.5s infinite alternate ease-in-out; }
+        @keyframes danceStep {
+            0% { transform: translateY(0) rotate(-5deg); }
+            100% { transform: translateY(-8px) rotate(5deg); }
+        }
+        .jump { animation: jumpAnim 0.3s ease-out; }
+        @keyframes jumpAnim {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-22px) scale(1.2); }
+            100% { transform: translateY(0); }
+        }
+        .play-area {
+            position: relative; flex: 1;
+            display: flex; justify-content: space-between;
+            padding: 0 15px; background: rgba(0,0,0,0.3); overflow: hidden;
+        }
+        .lane {
+            position: relative; width: 22%; height: 100%;
+            background: rgba(255,255,255,0.03);
+            border-left: 1px solid rgba(255,255,255,0.08);
+            border-right: 1px solid rgba(255,255,255,0.08);
+        }
+        .target-line {
+            position: absolute; bottom: 80px; width: 100%; height: 6px;
+            background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4;
+        }
+        .note {
+            position: absolute; width: 100%; height: 42px; border-radius: 8px;
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: bold; color: #fff;
+            border: 2px solid rgba(255,255,255,0.8); z-index: 5;
+        }
+        #feedback {
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 28px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0;
+            transition: opacity 0.1s; text-align: center; white-space: nowrap;
+        }
+        .control-panel {
+            height: 90px; background: rgba(0,0,0,0.8);
+            display: flex; justify-content: space-around; align-items: center; padding: 0 10px;
+        }
+        .hit-btn {
+            width: 22%; height: 65px;
+            background: linear-gradient(135deg, #ff7043, #d84315);
+            border: 2px solid #ffccbc; border-radius: 12px;
+            color: white; font-size: 12px; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .hit-btn:active, .hit-btn.pressed { transform: scale(0.92); background: #bf360c; }
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 15, 25, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; padding: 20px; text-align: center;
+        }
+        .btn-main {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white; border: none; padding: 14px 35px;
+            font-size: 18px; font-weight: bold; border-radius: 30px;
+            cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="header">
+            <div class="score-box"><div class="label">SCORE</div><div id="score" class="value">0</div></div>
+            <div class="combo-box"><div class="label">COMBO</div><div id="combo" class="value">0</div></div>
+            <div class="miss-box"><div class="label">MISS残数</div><div id="miss-left" class="miss-value">20</div></div>
+        </div>
+
+        <div class="stage-container">
+            <div class="dancers-row">
+                <div class="dancer"><div class="dancer-avatar">🦊</div><div class="dancer-name">コンちゃん</div></div>
+                <div class="dancer"><div class="dancer-avatar">🦝</div><div class="dancer-name">ポン子</div></div>
+                <div class="dancer"><div class="dancer-avatar">🍤</div><div class="dancer-name">えび代</div></div>
+                <div class="dancer"><div class="dancer-avatar">🥚</div><div class="dancer-name">つき美</div></div>
+                <div class="dancer"><div class="dancer-avatar">🥩</div><div class="dancer-name">マツザカ</div></div>
+            </div>
+            <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
+        </div>
+
+        <div class="play-area">
+            <div class="lane"></div><div class="lane"></div><div class="lane"></div><div class="lane"></div>
+            <div class="target-line"></div>
+            <div id="feedback">PERFECT!</div>
+        </div>
+
+        <div class="control-panel">
+            <button class="hit-btn" data-lane="0">きつね<br><small>[D]</small></button>
+            <button class="hit-btn" data-lane="1">たぬき<br><small>[F]</small></button>
+            <button class="hit-btn" data-lane="2">てんぷら<br><small>[J]</small></button>
+            <button class="hit-btn" data-lane="3">つきみ/肉<br><small>[K]</small></button>
+        </div>
+
+        <div id="start-screen" class="overlay">
+            <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
+            <p style="font-size:13px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
+                ファイル選択なしですぐ遊べます！<br>
+                20回MISSする前に最後まで完走しよう！
+            </p>
+            <button class="btn-main" id="start-btn">ゲームスタート！</button>
+        </div>
+
+        <div id="result-screen" class="overlay hidden">
+            <h2 id="result-title" style="color:var(--secondary); font-size: 26px;">🎉 クリア！おめでとう！ 🎉</h2>
+            <div id="res-score" style="font-size:22px; margin:15px 0; font-weight: bold;">SCORE: 0</div>
+            <div id="res-detail" style="font-size:13px; color:#ccc; margin-bottom:15px; line-height:1.5;"></div>
+            <button class="btn-main" id="restart-btn">もう一度プレイ</button>
+        </div>
+    </div>
+
+    <script>
+        const SONG_NOTES = [
+            { time: 1.5, lane: 0, text: "きつね" },
+            { time: 2.2, lane: 1, text: "たぬき" },
+            { time: 2.9, lane: 2, text: "てんぷら" },
+            { time: 3.6, lane: 3, text: "つきみ" },
+            { time: 4.3, lane: 0, text: "おにく" },
+            { time: 5.0, lane: 1, text: "きつね" },
+            { time: 5.7, lane: 2, text: "たぬき" },
+            { time: 6.4, lane: 3, text: "てんぷら" },
+            
+            { time: 8.0, lane: 0, text: "きつね" },
+            { time: 8.7, lane: 1, text: "たぬき" },
+            { time: 9.4, lane: 2, text: "てんぷら" },
+            { time: 10.1, lane: 3, text: "つきみ" },
+            { time: 10.8, lane: 0, text: "おにく" },
+            { time: 11.5, lane: 1, text: "うどん" },
+            { time: 12.2, lane: 2, text: "おいしい" },
+            { time: 13.0, lane: 3, text: "ヒガシマル" },
+
+            { time: 15.0, lane: 0, text: "きつね" },
+            { time: 15.7, lane: 1, text: "たぬき" },
+            { time: 16.4, lane: 2, text: "てんぷら" },
+            { time: 17.1, lane: 3, text: "つきみ" },
+            { time: 17.8, lane: 0, text: "おにく" },
+            { time: 18.5, lane: 1, text: "きつね" },
+            { time: 19.2, lane: 2, text: "たぬき" },
+            { time: 19.9, lane: 3, text: "てんぷら" },
+
+            { time: 21.5, lane: 0, text: "つきみ" },
+            { time: 22.2, lane: 1, text: "おにく" },
+            { time: 22.9, lane: 2, text: "うどん" },
+            { time: 23.6, lane: 3, text: "スープ" },
+
+            { time: 25.5, lane: 0, text: "きつね" },
+            { time: 26.2, lane: 1, text: "たぬき" },
+            { time: 26.9, lane: 2, text: "てんぷら" },
+            { time: 27.6, lane: 3, text: "つきみ" },
+            { time: 28.3, lane: 0, text: "おにく" },
+            { time: 29.0, lane: 1, text: "ヒガシマル" },
+            { time: 29.8, lane: 2, text: "うどん" },
+            { time: 30.5, lane: 3, text: "スープ！" }
+        ];
+
+        const MAX_MISS_ALLOWED = 20;
+        let score = 0, combo = 0, missCount = 0;
+        let gameActive = false, startTime = 0;
+        let activeNotes = [], noteElements = [], animId = null;
+        
+        // デフォルトで同じフォルダの "udon.mp3" を自動読み込み設定
+        const defaultAudio = new Audio('udon.mp3');
+        defaultAudio.volume = 0.9;
+
+        const lanes = document.querySelectorAll('.lane');
+        const dancers = document.querySelectorAll('.dancer');
+
+        function startGame() {
+            score = 0; 
+            combo = 0; 
+            missCount = 0;
+
+            document.getElementById('score').innerText = '0';
+            document.getElementById('combo').innerText = '0';
+            document.getElementById('miss-left').innerText = MAX_MISS_ALLOWED;
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            noteElements.forEach(n => n.el.remove());
+            noteElements = [];
+
+            activeNotes = JSON.parse(JSON.stringify(SONG_NOTES));
+            activeNotes.forEach((note, index) => {
+                const el = document.createElement('div');
+                el.className = 'note';
+                el.innerText = note.text;
+                lanes[note.lane].appendChild(el);
+                noteElements.push({ index, el, hit: false });
+            });
+
+            // 音源を自動再生
+            defaultAudio.currentTime = 0;
+            defaultAudio.play().catch(err => {
+                console.log("音声ファイルの自動再生がブロックされましたがゲームは続行します", err);
+            });
+
+            dancers.forEach(d => d.classList.add('dancing'));
+            gameActive = true;
+            startTime = performance.now();
+            updateGame();
+        }
+
+        function updateGame() {
+            if (!gameActive) return;
+            const elapsed = (performance.now() - startTime) / 1000;
+            const areaHeight = lanes[0].clientHeight;
+
+            activeNotes.forEach((note, i) => {
+                const obj = noteElements[i];
+                if (obj.hit) return;
+
+                const progress = 1.0 - ((note.time - elapsed) / 2.0);
+                const pos = areaHeight - (progress * (areaHeight - 80));
+
+                if (note.time - elapsed < -0.3) {
+                    obj.hit = true;
+                    obj.el.style.opacity = '0.2';
+                    handleMiss();
+                } else if (progress >= 0 && progress <= 1.5) {
+                    obj.el.style.bottom = pos + 'px';
+                }
+            });
+
+            if (missCount >= MAX_MISS_ALLOWED) {
+                endGame(false);
+                return;
+            }
+
+            const lastNoteTime = SONG_NOTES[SONG_NOTES.length - 1].time;
+            if (elapsed > lastNoteTime + 3.0) {
+                endGame(true);
+                return;
+            }
+
+            animId = requestAnimationFrame(updateGame);
+        }
+
+        function judgeLane(laneIndex) {
+            if (!gameActive) return;
+            const elapsed = (performance.now() - startTime) / 1000;
+
+            activeNotes.forEach((note, i) => {
+                if (note.lane === laneIndex && !noteElements[i].hit) {
+                    const diff = Math.abs(note.time - elapsed);
+                    if (diff < 0.25) {
+                        noteElements[i].hit = true;
+                        noteElements[i].el.remove();
+
+                        if (diff < 0.1) {
+                            score += 300; combo++;
+                            showFeedback('PERFECT!', '#ffeb3b');
+                        } else {
+                            score += 100; combo++;
+                            showFeedback('GOOD', '#8bc34a');
+                        }
+                        document.getElementById('score').innerText = score;
+                        document.getElementById('combo').innerText = combo;
+
+                        dancers.forEach(d => {
+                            d.classList.add('jump');
+                            setTimeout(() => d.classList.remove('jump'), 300);
+                        });
+                    }
+                }
+            });
+        }
+
+        function handleMiss() {
+            combo = 0;
+            missCount++;
+            const left = MAX_MISS_ALLOWED - missCount;
+            document.getElementById('combo').innerText = combo;
+            document.getElementById('miss-left').innerText = Math.max(0, left);
+            showFeedback('MISS', '#f44336');
+        }
+
+        function showFeedback(text, color) {
+            const fb = document.getElementById('feedback');
+            fb.innerText = text;
+            fb.style.color = color;
+            fb.style.opacity = '1';
+            setTimeout(() => fb.style.opacity = '0', 300);
+        }
+
+        function endGame(isClear) {
+            gameActive = false;
+            cancelAnimationFrame(animId);
+            defaultAudio.pause();
+
+            dancers.forEach(d => d.classList.remove('dancing'));
+
+            const titleEl = document.getElementById('result-title');
+            const detailEl = document.getElementById('res-detail');
+
+            if (isClear) {
+                titleEl.innerText = '🎉 クリア！おめでとう！ 🎉';
+                titleEl.style.color = '#ffc107';
+                detailEl.innerText = `最後まで曲を走り抜きました！\nMISS回数: ${missCount}回`;
+            } else {
+                titleEl.innerText = '😭 残念！もう一度チャレンジしてね！ 😭';
+                titleEl.style.color = '#f44336';
+                detailEl.innerText = `MISSが20回に達してしまいました…！`;
+            }
+
+            document.getElementById('res-score').innerText = 'SCORE: ' + score;
+            document.getElementById('result-screen').classList.remove('hidden');
+        }
+
+        const keys = { 'KeyD': 0, 'KeyF': 1, 'KeyJ': 2, 'KeyK': 3 };
+        window.addEventListener('keydown', e => {
+            if (keys.hasOwnProperty(e.code)) judgeLane(keys[e.code]);
+        });
+
+        document.querySelectorAll('.hit-btn').forEach(btn => {
+            const lane = parseInt(btn.getAttribute('data-lane'));
+            btn.addEventListener('click', () => judgeLane(lane));
+        });
+
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
+    </script>
+</body>
+</html>
+
+```
