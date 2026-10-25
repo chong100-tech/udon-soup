@@ -59,39 +59,97 @@
         .value { font-size: 17px; font-weight: bold; color: var(--secondary); }
         .miss-value { font-size: 17px; font-weight: bold; color: #f44336; }
 
+        /* 動画代わりのCMアニメーションステージ */
         .stage-container {
             position: relative;
             height: 190px;
-            background: #000;
+            background: radial-gradient(circle, #3a4454 0%, #111823 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 10px 0;
             border-bottom: 3px dashed rgba(255,255,255,0.2);
             overflow: hidden;
         }
 
-        .bg-video {
+        /* CM風のスポットライト光線エフェクト */
+        .spotlight {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            z-index: 1;
+            top: -50%; left: 50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(from 0deg at 50% 50%, rgba(255,193,7,0.15) 0deg, transparent 30deg, rgba(255,193,7,0.15) 60deg, transparent 90deg, rgba(255,193,7,0.15) 120deg, transparent 150deg);
+            transform: translate(-50%, 0);
+            animation: rotateLight 12s linear infinite;
             pointer-events: none;
+            z-index: 1;
         }
-        
+        @keyframes rotateLight {
+            0% { transform: translate(-50%, 0) rotate(0deg); }
+            100% { transform: translate(-50%, 0) rotate(360deg); }
+        }
+
         .bowl {
-            width: 120px; height: 42px;
+            width: 120px; height: 40px;
             background: #e0e0e0;
             border-bottom-left-radius: 60px; border-bottom-right-radius: 60px;
             border: 3px solid #b0b0b0;
             display: flex; align-items: center; justify-content: center;
             z-index: 5;
             box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-            margin-top: 5px;
         }
         .bowl-text { font-size: 12px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
 
+        /* 動物・ダンサーたちのCMアニメーション */
+        .dancers-stage {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding: 0 10px;
+            z-index: 4;
+            height: 90px;
+        }
+        .dancer-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-origin: bottom center;
+        }
+        .dancer-icon {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .dancer-label {
+            font-size: 9px;
+            font-weight: bold;
+            margin-top: 3px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: var(--secondary);
+        }
+
+        /* CM特有のリズムダンス（1体ずつ少しズレて踊る） */
+        @keyframes danceLeftRight {
+            0% { transform: translateY(0) rotate(-12deg) scale(0.95); }
+            50% { transform: translateY(-12px) rotate(0deg) scale(1.1); }
+            100% { transform: translateY(0) rotate(12deg) scale(0.95); }
+        }
+
+        .dancing .dancer-card:nth-child(1) { animation: danceLeftRight 0.4s infinite alternate ease-in-out; }
+        .dancing .dancer-card:nth-child(2) { animation: danceLeftRight 0.4s 0.08s infinite alternate ease-in-out; }
+        .dancing .dancer-card:nth-child(3) { animation: danceLeftRight 0.4s 0.16s infinite alternate ease-in-out; }
+        .dancing .dancer-card:nth-child(4) { animation: danceLeftRight 0.4s 0.24s infinite alternate ease-in-out; }
+        .dancing .dancer-card:nth-child(5) { animation: danceLeftRight 0.4s 0.32s infinite alternate ease-in-out; }
+
+        /* 5レーンプレイエリア */
         .play-area {
             position: relative; flex: 1;
             display: flex; justify-content: space-between;
@@ -176,10 +234,16 @@
         </div>
 
         <div class="stage-container">
-            <video class="bg-video" autoplay loop muted playsinline preload="auto">
-                <source src="videoplayback.mp4" type="video/mp4">
-            </video>
+            <div class="spotlight"></div>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
+            
+            <div class="dancers-stage dancing">
+                <div class="dancer-card"><div class="dancer-icon">🦊</div><div class="dancer-label">きつね</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🦝</div><div class="dancer-label">たぬき</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🍤</div><div class="dancer-label">てんぷら</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🥚</div><div class="dancer-label">つきみ</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🥩</div><div class="dancer-label">おにく</div></div>
+            </div>
         </div>
 
         <div id="countdown-overlay" class="hidden">8</div>
@@ -270,7 +334,6 @@
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
         
-        const bgVideo = document.querySelector('.bg-video');
         const lanes = document.querySelectorAll('.lane');
 
         let audioCtx = null;
@@ -341,11 +404,6 @@
 
             defaultAudio.currentTime = 0;
             defaultAudio.play().catch(err => console.log(err));
-            
-            if (bgVideo) {
-                bgVideo.currentTime = 0;
-                bgVideo.play().catch(err => console.log(err));
-            }
 
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
@@ -466,11 +524,12 @@
         }
 
         function showFeedback(text, color) {
-            const fb = document.getElementById('feedback');
-            fb.innerText = text;
-            fb.style.color = color;
-            fb.style.opacity = '1';
-            setTimeout(() => fb.style.opacity = '0', 300);
+            const fb = document.getElementById('fb');
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.innerText = text;
+            feedbackEl.style.color = color;
+            feedbackEl.style.opacity = '1';
+            setTimeout(() => feedbackEl.style.opacity = '0', 300);
         }
 
         function endGame(isClear) {
@@ -478,10 +537,6 @@
             cancelAnimationFrame(animId);
             if (countdownTimer) clearInterval(countdownTimer);
             defaultAudio.pause();
-            
-            if (bgVideo) {
-                bgVideo.pause();
-            }
 
             const titleEl = document.getElementById('result-title');
             const detailEl = document.getElementById('res-detail');
