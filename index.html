@@ -49,16 +49,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 15px;
+            padding: 10px 12px;
             background: rgba(0,0,0,0.6);
             z-index: 10;
             border-bottom: 2px solid rgba(255,255,255,0.1);
         }
         .score-box, .combo-box, .miss-box { text-align: center; }
         .label { font-size: 10px; color: #aaa; }
-        .value { font-size: 18px; font-weight: bold; color: var(--secondary); }
-        .miss-value { font-size: 18px; font-weight: bold; color: #f44336; }
+        .value { font-size: 17px; font-weight: bold; color: var(--secondary); }
+        .miss-value { font-size: 17px; font-weight: bold; color: #f44336; }
 
+        /* ステージ＆ダンサー演出（CM完全再現） */
         .stage-container {
             position: relative;
             height: 180px;
@@ -66,7 +67,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
+            padding-bottom: 10px;
             border-bottom: 3px dashed rgba(255,255,255,0.2);
             overflow: hidden;
         }
@@ -84,18 +86,19 @@
         .bowl-text { font-size: 13px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
         
         .dancers-row {
-            position: absolute; bottom: 25px;
+            position: absolute; bottom: 22px;
             display: flex; justify-content: space-around;
             width: 95%; z-index: 3;
         }
         .dancer {
             display: flex; flex-direction: column; align-items: center;
             transform-origin: bottom center;
+            transition: transform 0.2s;
         }
         .dancer-avatar {
             width: 38px; height: 38px; border-radius: 50%;
             background: #fff; border: 2px solid var(--primary);
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.4);
         }
         .dancer-name {
@@ -103,70 +106,85 @@
             white-space: nowrap;
         }
 
-        /* CM風の軽快なダンスアニメーション */
-        .dancing {
-            animation: cmDance 0.4s infinite alternate ease-in-out;
+        /* CM風ダンスアニメーション（歩行＆手足フリフリ） */
+        .cm-walking {
+            animation: cmWalk 0.3s infinite alternate ease-in-out;
         }
-        @keyframes cmDance {
-            0% { transform: translateY(0) rotate(-8deg) scaleX(0.95); }
-            100% { transform: translateY(-12px) rotate(8deg) scaleX(1.05); }
+        @keyframes cmWalk {
+            0% { transform: translateY(0) rotate(-6deg) scaleX(0.95); }
+            100% { transform: translateY(-8px) rotate(6deg) scaleX(1.05); }
         }
 
-        /* ノーツヒット時の大ジャンプ */
+        .cm-dancing {
+            animation: cmDance 0.45s infinite alternate ease-in-out;
+        }
+        @keyframes cmDance {
+            0% { transform: translateY(0) rotate(-12deg) scale(0.95); }
+            50% { transform: translateY(-10px) rotate(0deg) scale(1.05); }
+            100% { transform: translateY(0) rotate(12deg) scale(0.95); }
+        }
+
         .jump {
             animation: jumpAnim 0.3s ease-out;
         }
         @keyframes jumpAnim {
             0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-25px) scale(1.25) rotate(15deg); }
+            50% { transform: translateY(-22px) scale(1.25) rotate(15deg); }
             100% { transform: translateY(0) scale(1); }
         }
-        
+
+        /* 5レーンプレイエリア */
         .play-area {
             position: relative; flex: 1;
             display: flex; justify-content: space-between;
-            padding: 0 15px; background: rgba(0,0,0,0.3); overflow: hidden;
+            padding: 0 5px; background: rgba(0,0,0,0.3); overflow: hidden;
         }
         .lane {
-            position: relative; width: 22%; height: 100%;
+            position: relative; width: 19%; height: 100%;
             background: rgba(255,255,255,0.03);
             border-left: 1px solid rgba(255,255,255,0.08);
             border-right: 1px solid rgba(255,255,255,0.08);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .lane-title {
+            font-size: 10px; font-weight: bold; color: #ffca28; margin-top: 5px; opacity: 0.8;
+            background: rgba(0,0,0,0.4); padding: 2px 4px; border-radius: 4px;
         }
         .target-line {
-            position: absolute; bottom: 80px; width: 100%; height: 6px;
+            position: absolute; bottom: 75px; width: 100%; height: 6px;
             background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4;
         }
         .note {
-            position: absolute; width: 100%; height: 42px; border-radius: 8px;
+            position: absolute; width: 90%; height: 42px; border-radius: 8px;
             background: linear-gradient(135deg, #ff9800, #f57c00);
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; font-weight: bold; color: #fff;
             border: 2px solid rgba(255,255,255,0.8); z-index: 5;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
+        
         #feedback {
             position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 28px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0;
+            font-size: 26px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0;
             transition: opacity 0.1s; text-align: center; white-space: nowrap;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
         
+        /* 5ボタンコントロールパネル */
         .control-panel {
-            height: 95px; background: rgba(0,0,0,0.8);
-            display: flex; justify-content: space-around; align-items: center; padding: 0 10px;
+            height: 90px; background: rgba(0,0,0,0.8);
+            display: flex; justify-content: space-around; align-items: center; padding: 0 5px;
         }
         .hit-btn {
-            width: 22%; height: 70px;
+            width: 19%; height: 65px;
             background: linear-gradient(135deg, #ff7043, #d84315);
-            border: 2px solid #ffccbc; border-radius: 12px;
-            color: white; font-size: 12px; font-weight: bold;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer;
-            user-select: none;
+            border: 2px solid #ffccbc; border-radius: 10px;
+            color: white; font-size: 11px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; user-select: none; text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        .hit-btn:active, .hit-btn.pressed { transform: scale(0.92); background: #bf360c; }
+        .hit-btn:active { transform: scale(0.92); background: #bf360c; }
         
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -182,6 +200,12 @@
         }
         .btn-main:active { transform: scale(0.95); }
         .hidden { display: none !important; }
+        
+        #countdown-overlay {
+            position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 48px; font-weight: bold; color: var(--secondary);
+            text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -194,33 +218,41 @@
 
         <div class="stage-container">
             <div class="dancers-row">
-                <div class="dancer"><div class="dancer-avatar">🦊</div><div class="dancer-name">きつね</div></div>
-                <div class="dancer"><div class="dancer-avatar">🦝</div><div class="dancer-name">たぬき</div></div>
-                <div class="dancer"><div class="dancer-avatar">🍤</div><div class="dancer-name">てんぷら</div></div>
-                <div class="dancer"><div class="dancer-avatar">🥚</div><div class="dancer-name">つきみ</div></div>
-                <div class="dancer"><div class="dancer-avatar">🥩</div><div class="dancer-name">おにく</div></div>
+                <div class="dancer" id="dancer-0"><div class="dancer-avatar">🦊</div><div class="dancer-name">きつね</div></div>
+                <div class="dancer" id="dancer-1"><div class="dancer-avatar">🦝</div><div class="dancer-name">たぬき</div></div>
+                <div class="dancer" id="dancer-2"><div class="dancer-avatar">🍤</div><div class="dancer-name">てんぷら</div></div>
+                <div class="dancer" id="dancer-3"><div class="dancer-avatar">🥚</div><div class="dancer-name">つきみ</div></div>
+                <div class="dancer" id="dancer-4"><div class="dancer-avatar">🥩</div><div class="dancer-name">おにく</div></div>
             </div>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
         </div>
 
+        <div id="countdown-overlay" class="hidden">10</div>
+
         <div class="play-area">
-            <div class="lane"></div><div class="lane"></div><div class="lane"></div><div class="lane"></div>
+            <div class="lane" data-lane="0"><div class="lane-title">きつね</div></div>
+            <div class="lane" data-lane="1"><div class="lane-title">たぬき</div></div>
+            <div class="lane" data-lane="2"><div class="lane-title">てんぷら</div></div>
+            <div class="lane" data-lane="3"><div class="lane-title">つきみ</div></div>
+            <div class="lane" data-lane="4"><div class="lane-title">おにく</div></div>
             <div class="target-line"></div>
             <div id="feedback">PERFECT!</div>
         </div>
 
         <div class="control-panel">
-            <button class="hit-btn" data-lane="0">きつね<br><small>[D]</small></button>
-            <button class="hit-btn" data-lane="1">たぬき<br><small>[F]</small></button>
-            <button class="hit-btn" data-lane="2">てんぷら<br><small>[J]</small></button>
-            <button class="hit-btn" data-lane="3">つきみ/肉<br><small>[K]</small></button>
+            <button class="hit-btn" data-lane="0">きつね</button>
+            <button class="hit-btn" data-lane="1">たぬき</button>
+            <button class="hit-btn" data-lane="2">てんぷら</button>
+            <button class="hit-btn" data-lane="3">つきみ</button>
+            <button class="hit-btn" data-lane="4">おにく</button>
         </div>
 
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
-            <p style="font-size:13px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
-                キーボード [D] [F] [J] [K] またはタップ！<br>
-                動物たちと一緒に楽しく完走しよう！
+            <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
+                レーンに表示されている<b>正しい具材</b>の時にタップ！<br>
+                違う具材をタップしたり見逃すとMISS！<br>
+                ※スタート後10秒後に具材が落ちてきます。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
@@ -234,53 +266,35 @@
     </div>
 
     <script>
+        const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
+        const START_DELAY = 10.0; // 10秒後にノーツ開始
+
+        // ランダムノーツ生成（10秒以降に流れる）
         const SONG_NOTES = [
-            { time: 1.5, lane: 0, text: "きつね" },
-            { time: 2.2, lane: 1, text: "たぬき" },
-            { time: 2.9, lane: 2, text: "てんぷら" },
-            { time: 3.6, lane: 3, text: "つきみ" },
-            { time: 4.3, lane: 0, text: "おにく" },
-            { time: 5.0, lane: 1, text: "きつね" },
-            { time: 5.7, lane: 2, text: "たぬき" },
-            { time: 6.4, lane: 3, text: "てんぷら" },
-            
-            { time: 8.0, lane: 0, text: "きつね" },
-            { time: 8.7, lane: 1, text: "たぬき" },
-            { time: 9.4, lane: 2, text: "てんぷら" },
-            { time: 10.1, lane: 3, text: "つきみ" },
-            { time: 10.8, lane: 0, text: "おにく" },
-            { time: 11.5, lane: 1, text: "うどん" },
-            { time: 12.2, lane: 2, text: "おいしい" },
-            { time: 13.0, lane: 3, text: "ヒガシマル" },
-
-            { time: 15.0, lane: 0, text: "きつね" },
-            { time: 15.7, lane: 1, text: "たぬき" },
-            { time: 16.4, lane: 2, text: "てんぷら" },
-            { time: 17.1, lane: 3, text: "つきみ" },
-            { time: 17.8, lane: 0, text: "おにく" },
-            { time: 18.5, lane: 1, text: "きつね" },
-            { time: 19.2, lane: 2, text: "たぬき" },
-            { time: 19.9, lane: 3, text: "てんぷら" },
-
-            { time: 21.5, lane: 0, text: "つきみ" },
-            { time: 22.2, lane: 1, text: "おにく" },
-            { time: 22.9, lane: 2, text: "うどん" },
-            { time: 23.6, lane: 3, text: "スープ" },
-
-            { time: 25.5, lane: 0, text: "きつね" },
-            { time: 26.2, lane: 1, text: "たぬき" },
-            { time: 26.9, lane: 2, text: "てんぷら" },
-            { time: 27.6, lane: 3, text: "つきみ" },
-            { time: 28.3, lane: 0, text: "おにく" },
-            { time: 29.0, lane: 1, text: "ヒガシマル" },
-            { time: 29.8, lane: 2, text: "うどん" },
-            { time: 30.5, lane: 3, text: "スープ！" }
+            { time: START_DELAY + 1.0, lane: 0, text: "きつね" },
+            { time: START_DELAY + 2.0, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 3.0, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 4.0, lane: 3, text: "たぬき" }, // ダミー（MISS誘発）
+            { time: START_DELAY + 5.0, lane: 3, text: "つきみ" },
+            { time: START_DELAY + 6.0, lane: 4, text: "おにく" },
+            { time: START_DELAY + 7.5, lane: 0, text: "おにく" }, // ダミー
+            { time: START_DELAY + 8.5, lane: 0, text: "きつね" },
+            { time: START_DELAY + 9.5, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 10.5, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 11.5, lane: 3, text: "つきみ" },
+            { time: START_DELAY + 12.5, lane: 4, text: "おにく" },
+            { time: START_DELAY + 14.0, lane: 1, text: "きつね" }, // ダミー
+            { time: START_DELAY + 15.0, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 16.0, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 17.5, lane: 4, text: "おにく" },
+            { time: START_DELAY + 19.0, lane: 0, text: "きつね" },
+            { time: START_DELAY + 20.0, lane: 3, text: "つきみ" }
         ];
 
         const MAX_MISS_ALLOWED = 20;
         let score = 0, combo = 0, missCount = 0;
         let gameActive = false, startTime = 0;
-        let activeNotes = [], noteElements = [], animId = null;
+        let activeNotes = [], noteElements = [], animId = null, countdownTimer = null;
         
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
@@ -309,15 +323,38 @@
                 el.className = 'note';
                 el.innerText = note.text;
                 lanes[note.lane].appendChild(el);
-                noteElements.push({ index, el, hit: false });
+                noteElements.push({ index, el, hit: false, lane: note.lane, text: note.text, targetTime: note.time });
             });
 
+            // 音源再生
             defaultAudio.currentTime = 0;
-            defaultAudio.play().catch(err => {
-                console.log("音声ファイルの自動再生が制限されましたが進行します", err);
+            defaultAudio.play().catch(err => console.log(err));
+
+            // CM再現ダンスアニメーションの開始
+            dancers.forEach((d, idx) => {
+                d.classList.remove('cm-walking', 'cm-dancing');
+                setTimeout(() => d.classList.add('cm-walking'), idx * 300);
+                setTimeout(() => d.classList.add('cm-dancing'), 3000);
             });
 
-            dancers.forEach(d => d.classList.add('dancing'));
+            // 10秒カウントダウン演出
+            const cdEl = document.getElementById('countdown-overlay');
+            cdEl.classList.remove('hidden');
+            let timeLeft = 10;
+            cdEl.innerText = timeLeft;
+
+            if (countdownTimer) clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    cdEl.innerText = timeLeft;
+                } else {
+                    cdEl.innerText = "START!";
+                    setTimeout(() => cdEl.classList.add('hidden'), 800);
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+
             gameActive = true;
             startTime = performance.now();
             updateGame();
@@ -328,17 +365,19 @@
             const elapsed = (performance.now() - startTime) / 1000;
             const areaHeight = lanes[0].clientHeight;
 
-            activeNotes.forEach((note, i) => {
-                const obj = noteElements[i];
+            activeNotes.forEach((obj) => {
                 if (obj.hit) return;
 
-                const progress = 1.0 - ((note.time - elapsed) / 2.0);
-                const pos = areaHeight - (progress * (areaHeight - 80));
+                const progress = 1.0 - ((obj.targetTime - elapsed) / 2.0);
+                const pos = areaHeight - (progress * (areaHeight - 75));
 
-                if (note.time - elapsed < -0.3) {
+                if (obj.targetTime - elapsed < -0.35) {
                     obj.hit = true;
                     obj.el.style.opacity = '0.2';
-                    handleMiss();
+                    // 正しい具材を見逃した場合はMISS
+                    if (obj.text === INGREDIENTS[obj.lane]) {
+                        handleMiss();
+                    }
                 } else if (progress >= 0 && progress <= 1.5) {
                     obj.el.style.bottom = pos + 'px';
                 }
@@ -361,31 +400,44 @@
         function judgeLane(laneIndex) {
             if (!gameActive) return;
             const elapsed = (performance.now() - startTime) / 1000;
+            const targetIngredient = INGREDIENTS[laneIndex];
 
-            activeNotes.forEach((note, i) => {
-                if (note.lane === laneIndex && !noteElements[i].hit) {
-                    const diff = Math.abs(note.time - elapsed);
-                    if (diff < 0.25) {
-                        noteElements[i].hit = true;
-                        noteElements[i].el.remove();
+            let hitFound = false;
 
-                        if (diff < 0.1) {
-                            score += 300; combo++;
-                            showFeedback('PERFECT!', '#ffeb3b');
+            activeNotes.forEach((obj) => {
+                if (obj.lane === laneIndex && !obj.hit) {
+                    const diff = Math.abs(obj.targetTime - elapsed);
+                    if (diff < 0.3) {
+                        obj.hit = true;
+                        obj.el.remove();
+                        hitFound = true;
+
+                        // レーンと具材が一致しているかチェック
+                        if (obj.text === targetIngredient) {
+                            if (diff < 0.12) {
+                                score += 300; combo++;
+                                showFeedback('PERFECT!', '#ffeb3b');
+                            } else {
+                                score += 100; combo++;
+                                showFeedback('GOOD', '#8bc34a');
+                            }
+                            document.getElementById('score').innerText = score;
+                            document.getElementById('combo').innerText = combo;
+
+                            const dancerEl = document.getElementById(`dancer-${laneIndex}`);
+                            if (dancerEl) {
+                                dancerEl.classList.add('jump');
+                                setTimeout(() => dancerEl.classList.remove('jump'), 300);
+                            }
                         } else {
-                            score += 100; combo++;
-                            showFeedback('GOOD', '#8bc34a');
+                            // 違う具材を押した場合はMISS
+                            handleMiss();
                         }
-                        document.getElementById('score').innerText = score;
-                        document.getElementById('combo').innerText = combo;
-
-                        dancers.forEach(d => {
-                            d.classList.add('jump');
-                            setTimeout(() => d.classList.remove('jump'), 300);
-                        });
                     }
                 }
             });
+
+            // ノーツが無い時に適当に連打した場合はペナルティなし（またはペナルティが必要な場合は追加可）
         }
 
         function handleMiss() {
@@ -408,9 +460,10 @@
         function endGame(isClear) {
             gameActive = false;
             cancelAnimationFrame(animId);
+            if (countdownTimer) clearInterval(countdownTimer);
             defaultAudio.pause();
 
-            dancers.forEach(d => d.classList.remove('dancing'));
+            dancers.forEach(d => d.classList.remove('cm-walking', 'cm-dancing'));
 
             const titleEl = document.getElementById('result-title');
             const detailEl = document.getElementById('res-detail');
@@ -418,7 +471,7 @@
             if (isClear) {
                 titleEl.innerText = '🎉 クリア！おめでとう！ 🎉';
                 titleEl.style.color = '#ffc107';
-                detailEl.innerText = `最後まで曲を走り抜きました！\nMISS回数: ${missCount}回`;
+                detailEl.innerText = `最後まで演奏しきりました！\nMISS回数: ${missCount}回`;
             } else {
                 titleEl.innerText = '😭 残念！もう一度チャレンジしてね！ 😭';
                 titleEl.style.color = '#f44336';
@@ -429,11 +482,7 @@
             document.getElementById('result-screen').classList.remove('hidden');
         }
 
-        const keys = { 'KeyD': 0, 'KeyF': 1, 'KeyJ': 2, 'KeyK': 3 };
-        window.addEventListener('keydown', e => {
-            if (keys.hasOwnProperty(e.code)) judgeLane(keys[e.code]);
-        });
-
+        // タップ＆クリックイベント登録（5ボタン対応）
         document.querySelectorAll('.hit-btn').forEach(btn => {
             const lane = parseInt(btn.getAttribute('data-lane'));
             btn.addEventListener('click', () => judgeLane(lane));
