@@ -326,15 +326,12 @@
         let gameActive = false, startTime = 0;
         let activeNotes = [], countdownTimer = null, animId = null;
         
-        // 各レーンのロック状態（一度叩いたら次のおかずが出るまで無効化）
-        let laneLocked = [false, false, false, false, false];
-        
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
         
         const lanes = document.querySelectorAll('.lane');
 
-        // BGMに負けない大音量で、3種類の効果音を完全に個別に設定
+        // 効果音（BGMに負けない高音量・3種個別）
         let audioCtx = null;
         function playSound(type) {
             try {
@@ -348,24 +345,21 @@
 
                 const now = audioCtx.currentTime;
                 if (type === 'perfect') {
-                    // PERFECT：高音キラキラ和音（ピピッ♪）
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(880.00, now); // A5
-                    osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+                    osc.frequency.setValueAtTime(880.00, now);
+                    osc.frequency.setValueAtTime(1318.51, now + 0.08);
                     gain.gain.setValueAtTime(0.6, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
                     osc.start(now);
                     osc.stop(now + 0.25);
                 } else if (type === 'good') {
-                    // GOOD：中音のポップ音（ポン♪）
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(523.25, now);
                     gain.gain.setValueAtTime(0.65, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
                     osc.start(now);
                     osc.stop(now + 0.2);
                 } else {
-                    // MISS / おてつき：低く重いブーッ音
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(110, now);
                     osc.frequency.setValueAtTime(70, now + 0.12);
@@ -385,7 +379,6 @@
             missCount = 0;
             perfectCount = 0;
             goodCount = 0;
-            laneLocked = [false, false, false, false, false];
 
             document.getElementById('score').innerText = '0';
             document.getElementById('combo').innerText = '0';
@@ -405,7 +398,8 @@
                 return {
                     index,
                     el,
-                    hit: false,
+                    hit: false,       // 判定完了フラグ
+                    judged: false,    // 連打防止用の個別ノーツロックフラグ
                     lane: item.lane,
                     type: item.type,
                     targetTime: targetTime
@@ -445,16 +439,12 @@
 
             let allCleared = true;
 
-            // 現在進行形で画面内におかずが存在しているレーンをチェック
-            let activeLanesThisFrame = [false, false, false, false, false];
-
             activeNotes.forEach((obj) => {
                 if (!obj.hit) {
                     allCleared = false;
                     const dropStartTime = obj.targetTime - fallDuration;
 
                     if (elapsed >= dropStartTime) {
-                        activeLanesThisFrame[obj.lane] = true;
                         const progress = (elapsed - dropStartTime) / fallDuration;
                         const targetLineOffset = 75;
                         const totalTravel = playAreaHeight - targetLineOffset;
@@ -465,23 +455,16 @@
                         }
                     }
 
-                    // 判定ラインを完全に通り過ぎて見逃した場合（自分のレーンと一致するもの）
-                    if (elapsed > obj.targetTime + 0.20) {
+                    // 判定ラインを通り過ぎてしまい、タップされなかった場合（見逃しMISS）
+                    if (elapsed > obj.targetTime + 0.18) {
                         obj.hit = true;
-                        obj.el.remove(); // 画面から即座に削除
+                        obj.el.remove(); // 画面から即消去
                         if (obj.type === obj.lane) {
                             handleMiss();
                         }
                     }
                 }
             });
-
-            // おかずが存在しなくなったレーンのロックを自動解除し、次のおかずへの入力を受付可能にする
-            for (let i = 0; i < 5; i++) {
-                if (!activeLanesThisFrame[i]) {
-                    laneLocked[i] = false;
-                }
-            }
 
             if (missCount >= MAX_MISS_ALLOWED || elapsed >= TOTAL_GAME_DURATION) {
                 endGame(missCount < MAX_MISS_ALLOWED);
@@ -498,33 +481,38 @@
 
         function judgeLane(laneIndex) {
             if (!gameActive) return;
-            
-            // このレーンに現在落ちてきているおかずに対してすでに押していれば、何もしない（連打・複数回押し完全防止）
-            if (laneLocked[laneIndex]) return;
-
             const elapsed = (performance.now() - startTime) / 1000;
+            
             let hitFound = false;
 
+            // レーンに存在する「まだ判定されていない最も近いノーツ」を1つだけ探す
             for (let obj of activeNotes) {
                 if (obj.lane === laneIndex && !obj.hit) {
-                    const diff = Math.abs(obj.targetTime - elapsed);
-                    
-                    // おかずが黄色の線に触れている範囲（判定幅：0.25秒以内）
-                    if (diff < 0.25) {
+                    // すでにこのノーツが一度でも押されてロックされている場合はスキップ（連打無効化）
+                    if (obj.judged) continue;
+
+                    const diff = obj.targetTime - elapsed; // 正負の値（マイナス＝遅い、プラス＝早い）
+                    const absDiff = Math.abs(diff);
+
+                    // タップが判定枠内（±0.2秒以内）に入っているか
+                    if (absDiff < 0.20) {
                         hitFound = true;
-                        obj.hit = true;
-                        obj.el.remove();
-                        laneLocked[laneIndex] = true; // このおかずの処理が終わったので次のおかずまでロック
+                        obj.judged = true; // このノーツへの連打を完全ロック
 
                         if (obj.type === laneIndex) {
-                            if (diff < 0.075) {
-                                // 線の真ん中付近のみ：PERFECT
+                            // 正しいおかず
+                            if (absDiff <= 0.06) {
+                                // 🌟 測定ルール：中央に来た時のみ PERFECT
+                                obj.hit = true;
+                                obj.el.remove();
                                 score += 300; combo++;
                                 perfectCount++;
                                 showFeedback('PERFECT!', '#ffeb3b');
                                 playSound('perfect');
-                            } else {
-                                // 触れているが中央ではない：GOOD
+                            } else if (absDiff < 0.20) {
+                                // 🌟 測定ルール：中央ではないが触れているとき GOOD
+                                obj.hit = true;
+                                obj.el.remove();
                                 score += 100; combo++;
                                 goodCount++;
                                 showFeedback('GOOD', '#8bc34a');
@@ -534,14 +522,16 @@
                             document.getElementById('combo').innerText = combo;
                         } else {
                             // 違うおかずが流れてきているレーンだった場合
+                            obj.hit = true;
+                            obj.el.remove();
                             handleMiss();
                         }
-                        break;
+                        break; // 一度のタップで1つのノーツのみ処理
                     }
                 }
             }
 
-            // 近くにノーツが無いのにタップした場合（おてつき）
+            // 近くにおかずが無いのにタップした場合（おてつき）
             if (!hitFound) {
                 handleMiss();
             }
