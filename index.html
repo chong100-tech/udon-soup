@@ -264,8 +264,8 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 15px;">
-                レーンに一致する具材アイコンをタップしよう！<br>
-                毎回ランダムでおかずが登場します。<br>
+                レーンに一致する具材アイコンが高確率で登場！<br>
+                リズムに合わせて正しくタップしよう！<br>
                 <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
@@ -344,22 +344,33 @@
             }
         }
 
-        // 毎回完全にランダムな譜面を生成する関数
+        // 正解のおかずが約80%の確率で出現するランダム譜面生成関数
         function generateRandomTimings() {
             let timings = [];
             let currentTime = 0.0;
             
-            // 約125秒間にわたってランダムなおかずを配置
             while (currentTime < 125.0) {
                 const randomLane = Math.floor(Math.random() * 5); // 0〜4レーン
-                const randomType = Math.floor(Math.random() * 5); // 0〜4（狐、たぬき、天ぷら、月見、肉）
+                
+                let noteType;
+                const rand = Math.random();
+                if (rand < 0.80) {
+                    // 80%の確率でレーンと一致する正しいおかず（例：レーン0ならきつね）
+                    noteType = randomLane;
+                } else {
+                    // 残り20%の確率で別のランダムなおかず
+                    let otherTypes = [0, 1, 2, 3, 4].filter(t => t !== randomLane);
+                    noteType = otherTypes[Math.floor(Math.random() * otherTypes.length)];
+                }
+
                 timings.push({
                     t: currentTime,
                     lane: randomLane,
-                    type: randomType
+                    type: noteType
                 });
-                // 0.9秒〜1.6秒おきにランダムに出現
-                currentTime += 0.9 + Math.random() * 0.7;
+
+                // 0.9秒〜1.5秒おきに出現
+                currentTime += 0.9 + Math.random() * 0.6;
             }
             return timings;
         }
@@ -380,7 +391,6 @@
 
             document.querySelectorAll('.note').forEach(el => el.remove());
 
-            // 毎回完全ランダムなタイミング＆種類でノートを作成
             const rawTimings = generateRandomTimings();
 
             activeNotes = rawTimings.map((item, index) => {
@@ -455,10 +465,9 @@
                     const noteTop = parseFloat(obj.el.style.top) || -50;
                     const noteBottom = noteTop + 44;
 
-                    // 完全に下まで通り過ぎた場合（見逃しMISS）
                     if (noteBottom > targetLinePixelFromTop + 60) {
-                        obj.removed = true; // 処理済みにして二度と判定されないようにする
-                        obj.el.remove();    // 即時削除
+                        obj.removed = true;
+                        obj.el.remove();
                         
                         if (obj.type === obj.lane) {
                             handleMiss();
@@ -497,11 +506,10 @@
                     const distance = noteCenter - targetCenter; 
                     const absDistance = Math.abs(distance);
 
-                    // 判定範囲内（±45px以内）
                     if (absDistance <= 45) {
                         hitFound = true;
-                        obj.removed = true; // ★判定完了：即座にロック（連打防止）
-                        obj.el.remove();    // ★即座に削除（底落ちMISSのバグを完全防止）
+                        obj.removed = true; 
+                        obj.el.remove();    
 
                         if (obj.type === laneIndex) {
                             if (absDistance <= 12) {
