@@ -1,3 +1,12 @@
+失礼いたしました！カウントダウンの長さを **「8秒」** に戻し、その8秒間のカウントダウンが完全に終わって「START!」となってから、最初の具材がちょうどタイミングよく落ちてくるように時間をきっちり合わせました。
+
+以下のコードをコピーして、GitHubの `index.html` に上書き保存してください！
+
+---
+
+### 📄 8秒カウントダウン完全同期版コード（`index.html` に上書き）
+
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -219,7 +228,7 @@
             </div>
         </div>
 
-        <div id="countdown-overlay" class="hidden">3</div>
+        <div id="countdown-overlay" class="hidden">8</div>
 
         <div class="play-area">
             <div class="lane" data-lane="0"><div class="lane-title">きつね</div></div>
@@ -242,8 +251,9 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
-                レーンに一致する具材のボタンをタップ！<br>
-                <b>MISSが20回</b>に達する前に、すべての具材を演奏しきればクリア！
+                スタート後、<b>8秒間のカウントダウン</b>のあとに具材が落ちてきます！<br>
+                レーンに一致する具材をタップして完走しよう。<br>
+                <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
@@ -258,23 +268,22 @@
 
     <script>
         const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
-        const START_DELAY = 3.0; // スタート後すぐに（3秒のカウントダウン後）落ちてきます
+        const START_DELAY = 8.0; // 8秒のカウントダウンが完全に終わってからノーツを落下させる設計
 
-        // 譜面データ（すべてのノーツをクリアするとゲームクリアになります）
         const RAW_TIMINGS = [
             { t: 0.0, lane: 0, text: "きつね" },
             { t: 1.2, lane: 1, text: "たぬき" },
             { t: 2.4, lane: 2, text: "てんぷら" },
-            { t: 3.6, lane: 3, text: "たぬき" }, // ダミー
+            { t: 3.6, lane: 3, text: "たぬき" }, 
             { t: 4.8, lane: 3, text: "つきみ" },
             { t: 6.0, lane: 4, text: "おにく" },
-            { t: 7.5, lane: 0, text: "おにく" }, // ダミー
+            { t: 7.5, lane: 0, text: "おにく" }, 
             { t: 9.0, lane: 0, text: "きつね" },
             { t: 10.2, lane: 1, text: "たぬき" },
             { t: 11.4, lane: 2, text: "てんぷら" },
             { t: 12.6, lane: 3, text: "つきみ" },
             { t: 13.8, lane: 4, text: "おにく" },
-            { t: 15.5, lane: 1, text: "きつね" }, // ダミー
+            { t: 15.5, lane: 1, text: "きつね" }, 
             { t: 16.7, lane: 1, text: "たぬき" },
             { t: 17.9, lane: 2, text: "てんぷら" },
             { t: 19.5, lane: 4, text: "おにく" },
@@ -330,10 +339,10 @@
             // ダンスアニメーション開始
             dancers.forEach((d) => d.classList.add('cm-dancing'));
 
-            // 3秒カウントダウン表示
+            // 8秒カウントダウン表示
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
-            let timeLeft = 3;
+            let timeLeft = 8;
             cdEl.innerText = timeLeft;
 
             if (countdownTimer) clearInterval(countdownTimer);
@@ -377,7 +386,6 @@
                         }
                     }
 
-                    // 見逃しMISS判定
                     if (elapsed > obj.targetTime + 0.35) {
                         obj.hit = true;
                         obj.el.style.opacity = '0.2';
@@ -388,13 +396,11 @@
                 }
             });
 
-            // 20回ミスしたらゲームオーバー
             if (missCount >= MAX_MISS_ALLOWED) {
                 endGame(false);
                 return;
             }
 
-            // 全てのノーツを叩き終えたらクリア！
             if (allCleared) {
                 endGame(true);
                 return;
@@ -491,7 +497,9 @@
         });
 
         document.getElementById('start-btn').addEventListener('click', startGame);
-        document.getElementById('restart-btn', startGame).addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
     </script>
 </body>
 </html>
+
+```
