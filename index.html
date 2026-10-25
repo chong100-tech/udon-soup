@@ -195,7 +195,7 @@
         
         #countdown-overlay {
             position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 48px; font-weight: bold; color: var(--secondary);
+            font-size: 56px; font-weight: bold; color: var(--secondary);
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
     </style>
@@ -219,7 +219,7 @@
             </div>
         </div>
 
-        <div id="countdown-overlay" class="hidden">8</div>
+        <div id="countdown-overlay" class="hidden">3</div>
 
         <div class="play-area">
             <div class="lane" data-lane="0"><div class="lane-title">きつね</div></div>
@@ -243,8 +243,7 @@
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
                 レーンに一致する具材のボタンをタップ！<br>
-                違う具材や見逃しはMISS（20回で終了）！<br>
-                ※スタート後<b>8秒後</b>に具材が落ちてきます。
+                <b>MISSが20回</b>に達する前に、すべての具材を演奏しきればクリア！
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
@@ -259,9 +258,9 @@
 
     <script>
         const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
-        const START_DELAY = 8.0; // 8秒後に最初のノーツが判定ラインへ到着
+        const START_DELAY = 3.0; // スタート後すぐに（3秒のカウントダウン後）落ちてきます
 
-        // 判定タイミング（秒数）の設定
+        // 譜面データ（すべてのノーツをクリアするとゲームクリアになります）
         const RAW_TIMINGS = [
             { t: 0.0, lane: 0, text: "きつね" },
             { t: 1.2, lane: 1, text: "たぬき" },
@@ -306,10 +305,8 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
 
-            // 既存ノーツの消去
             document.querySelectorAll('.note').forEach(el => el.remove());
 
-            // ノーツデータの初期化
             activeNotes = RAW_TIMINGS.map((item, index) => {
                 const targetTime = START_DELAY + item.t;
                 const el = document.createElement('div');
@@ -333,10 +330,10 @@
             // ダンスアニメーション開始
             dancers.forEach((d) => d.classList.add('cm-dancing'));
 
-            // 8秒カウントダウン
+            // 3秒カウントダウン表示
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
-            let timeLeft = 8;
+            let timeLeft = 3;
             cdEl.innerText = timeLeft;
 
             if (countdownTimer) clearInterval(countdownTimer);
@@ -346,7 +343,7 @@
                     cdEl.innerText = timeLeft;
                 } else {
                     cdEl.innerText = "START!";
-                    setTimeout(() => cdEl.classList.add('hidden'), 800);
+                    setTimeout(() => cdEl.classList.add('hidden'), 600);
                     clearInterval(countdownTimer);
                 }
             }, 1000);
@@ -360,43 +357,45 @@
             if (!gameActive) return;
             const elapsed = (performance.now() - startTime) / 1000;
             const playAreaHeight = lanes[0].clientHeight;
-            const fallDuration = 2.0; // ノーツが落ちきるまでの時間（2秒）
+            const fallDuration = 2.0;
+
+            let allCleared = true;
 
             activeNotes.forEach((obj) => {
-                if (obj.hit) return;
+                if (!obj.hit) {
+                    allCleared = false;
+                    const dropStartTime = obj.targetTime - fallDuration;
 
-                const dropStartTime = obj.targetTime - fallDuration;
+                    if (elapsed >= dropStartTime) {
+                        const progress = (elapsed - dropStartTime) / fallDuration;
+                        const targetLineOffset = 75;
+                        const totalTravel = playAreaHeight - targetLineOffset;
+                        const currentTop = progress * totalTravel;
 
-                if (elapsed >= dropStartTime) {
-                    const progress = (elapsed - dropStartTime) / fallDuration; // 0.0 ～ 1.0 (判定ライン到達)
-                    const targetLineOffset = 75; // 判定ラインのbottom(px)
-                    const totalTravel = playAreaHeight - targetLineOffset;
-                    
-                    // 上端(0px)から判定ライン(totalTravel px)まで落下位置計算
-                    const currentTop = progress * totalTravel;
-
-                    if (progress <= 1.25) {
-                        obj.el.style.top = currentTop + 'px';
+                        if (progress <= 1.25) {
+                            obj.el.style.top = currentTop + 'px';
+                        }
                     }
-                }
 
-                // 判定ラインを大幅に通り過ぎた場合（見逃しMISS）
-                if (elapsed > obj.targetTime + 0.35) {
-                    obj.hit = true;
-                    obj.el.style.opacity = '0.2';
-                    if (obj.text === INGREDIENTS[obj.lane]) {
-                        handleMiss();
+                    // 見逃しMISS判定
+                    if (elapsed > obj.targetTime + 0.35) {
+                        obj.hit = true;
+                        obj.el.style.opacity = '0.2';
+                        if (obj.text === INGREDIENTS[obj.lane]) {
+                            handleMiss();
+                        }
                     }
                 }
             });
 
+            // 20回ミスしたらゲームオーバー
             if (missCount >= MAX_MISS_ALLOWED) {
                 endGame(false);
                 return;
             }
 
-            const lastTargetTime = activeNotes[activeNotes.length - 1].targetTime;
-            if (elapsed > lastTargetTime + 3.0) {
+            // 全てのノーツを叩き終えたらクリア！
+            if (allCleared) {
                 endGame(true);
                 return;
             }
@@ -471,7 +470,7 @@
             if (isClear) {
                 titleEl.innerText = '🎉 クリア！おめでとう！ 🎉';
                 titleEl.style.color = '#ffc107';
-                detailEl.innerText = `最後まで演奏しきりました！\nMISS回数: ${missCount}回`;
+                detailEl.innerText = `すべての具材を完走しました！\nMISS回数: ${missCount}回`;
             } else {
                 titleEl.innerText = '😭 残念！もう一度チャレンジしてね！ 😭';
                 titleEl.style.color = '#f44336';
@@ -492,7 +491,7 @@
         });
 
         document.getElementById('start-btn').addEventListener('click', startGame);
-        document.getElementById('restart-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn', startGame).addEventListener('click', startGame);
     </script>
 </body>
 </html>
