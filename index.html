@@ -213,9 +213,9 @@
         </div>
 
         <div id="result-screen" class="overlay hidden">
-            <h2 id="result-title" style="color:var(--secondary); font-size: 26px;">🎉 クリア！おめでとう！ 🎉</h2>
-            <div id="res-score" style="font-size:22px; margin:15px 0; font-weight: bold;">SCORE: 0</div>
-            <div id="res-detail" style="font-size:13px; color:#ccc; margin-bottom:15px; line-height:1.5;"></div>
+            <h2 id="result-title" style="color:var(--secondary); font-size: 24px;">🎉 クリア！おめでとう！ 🎉</h2>
+            <div id="res-score" style="font-size:20px; margin:10px 0; font-weight: bold;">SCORE: 0</div>
+            <div id="res-detail" style="font-size:12px; color:#ccc; margin-bottom:15px; line-height:1.6;"></div>
             <button class="btn-main" id="restart-btn">もう一度プレイ</button>
         </div>
     </div>
@@ -263,6 +263,7 @@
 
         const MAX_MISS_ALLOWED = 20;
         let score = 0, combo = 0, missCount = 0;
+        let perfectCount = 0, goodCount = 0;
         let gameActive = false, startTime = 0;
         let activeNotes = [], countdownTimer = null, animId = null;
         
@@ -310,6 +311,8 @@
             score = 0; 
             combo = 0; 
             missCount = 0;
+            perfectCount = 0;
+            goodCount = 0;
 
             document.getElementById('score').innerText = '0';
             document.getElementById('combo').innerText = '0';
@@ -390,7 +393,6 @@
                         }
                     }
 
-                    // 【修正】自分のレーンに「自分のレーンと同じおかず」が来て見逃した場合のみMISSにする
                     if (elapsed > obj.targetTime + 0.35) {
                         obj.hit = true;
                         obj.el.style.opacity = '0.2';
@@ -428,13 +430,14 @@
                         obj.hit = true;
                         obj.el.remove();
 
-                        // 正しいおかずなら成功、違うおかずならミス
                         if (obj.type === laneIndex) {
                             if (diff < 0.15) {
                                 score += 300; combo++;
+                                perfectCount++;
                                 showFeedback('PERFECT!', '#ffeb3b');
                             } else {
                                 score += 100; combo++;
+                                goodCount++;
                                 showFeedback('GOOD', '#8bc34a');
                             }
                             document.getElementById('score').innerText = score;
@@ -447,7 +450,6 @@
                 }
             });
 
-            // 近くにノーツが無いのにタップした場合（おてつき）
             if (!hitFound) {
                 handleMiss();
             }
@@ -487,12 +489,16 @@
             if (isClear) {
                 titleEl.innerText = '🎉 曲を完走！おめでとう！ 🎉';
                 titleEl.style.color = '#ffc107';
-                detailEl.innerText = `見事に最後まで歌いきりました！\nMISS回数: ${missCount}回`;
             } else {
                 titleEl.innerText = '😭 残念！もう一度チャレンジしてね！ 😭';
                 titleEl.style.color = '#f44336';
-                detailEl.innerText = `MISSが20回に達してしまいました…！`;
             }
+
+            detailEl.innerHTML = `
+                PERFECT: ${perfectCount}回<br>
+                GOOD: ${goodCount}回<br>
+                MISS: ${missCount}回
+            `;
 
             document.getElementById('res-score').innerText = 'SCORE: ' + score;
             document.getElementById('result-screen').classList.remove('hidden');
