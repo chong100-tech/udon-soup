@@ -1,21 +1,3 @@
-音声ファイルを最初から組み込み、**「ファイル選択ボタン」なしで、リンクやHTMLを開くだけですぐに曲が流れて遊べる状態**にした完成版のコードを作成しました！
-
-### 🌐 人に遊んでもらうためのコツ（スマホ対応）
-
-このファイルをそのままメールやLINEで送ったり、パソコンからスマホに送っても、セキュリティ上スマホ単体では音源がうまく読み込めない場合があります。
-
-そのため、もしお知り合いにスマホやPCで手軽に遊んでもらいたい場合は、以下のどちらかの方法が一番スムーズです：
-
-1. **GitHub Pages や Netlify などの無料サービスにアップロードする**（ネット上に置くだけで専用のURLがもらえ、スマホからそのURLを踏むだけで誰でも遊べるようになります）
-2. **PCで遊んでもらう**（同じフォルダに `udon.mp3` とこの `index.html` を入れてZIPにまとめて渡す）
-
-今回は、**プログラム側にあらかじめ音源の読み込み設定を組み込んだ状態**のコードをご用意しました。
-
----
-
-### 📄 完全版コード（そのままコピーして `index.html` に保存してください）
-
-```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -29,31 +11,42 @@
             --bg-color: #1a1a2e;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
+        
+        /* 画面全体のスクロールを許可する設定 */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
             background-color: var(--bg-color);
             color: #fff;
             font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
+            justify-content: flex-start;
+            padding: 10px 0;
             touch-action: manipulation;
         }
+
+        /* ゲーム画面本体（縦長コンテナ） */
         #game-container {
             position: relative;
             width: 100%;
             max-width: 480px;
-            height: 100vh;
-            max-height: 850px;
+            height: 820px;
             background: linear-gradient(135deg, #2c3e50, #111);
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             border: 4px solid #333;
+            border-radius: 12px;
+            margin: auto;
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -115,6 +108,7 @@
             50% { transform: translateY(-22px) scale(1.2); }
             100% { transform: translateY(0); }
         }
+        
         .play-area {
             position: relative; flex: 1;
             display: flex; justify-content: space-between;
@@ -142,19 +136,22 @@
             font-size: 28px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0;
             transition: opacity 0.1s; text-align: center; white-space: nowrap;
         }
+        
         .control-panel {
-            height: 90px; background: rgba(0,0,0,0.8);
+            height: 95px; background: rgba(0,0,0,0.8);
             display: flex; justify-content: space-around; align-items: center; padding: 0 10px;
         }
         .hit-btn {
-            width: 22%; height: 65px;
+            width: 22%; height: 70px;
             background: linear-gradient(135deg, #ff7043, #d84315);
             border: 2px solid #ffccbc; border-radius: 12px;
             color: white; font-size: 12px; font-weight: bold;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer;
+            user-select: none;
         }
         .hit-btn:active, .hit-btn.pressed { transform: scale(0.92); background: #bf360c; }
+        
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 15, 25, 0.95);
@@ -205,7 +202,7 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:13px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
-                ファイル選択なしですぐ遊べます！<br>
+                キーボード [D] [F] [J] [K] またはタップ！<br>
                 20回MISSする前に最後まで完走しよう！
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
@@ -268,7 +265,6 @@
         let gameActive = false, startTime = 0;
         let activeNotes = [], noteElements = [], animId = null;
         
-        // デフォルトで同じフォルダの "udon.mp3" を自動読み込み設定
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
 
@@ -299,10 +295,9 @@
                 noteElements.push({ index, el, hit: false });
             });
 
-            // 音源を自動再生
             defaultAudio.currentTime = 0;
             defaultAudio.play().catch(err => {
-                console.log("音声ファイルの自動再生がブロックされましたがゲームは続行します", err);
+                console.log("音声ファイルの自動再生が制限されましたが進行します", err);
             });
 
             dancers.forEach(d => d.classList.add('dancing'));
@@ -425,6 +420,10 @@
         document.querySelectorAll('.hit-btn').forEach(btn => {
             const lane = parseInt(btn.getAttribute('data-lane'));
             btn.addEventListener('click', () => judgeLane(lane));
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                judgeLane(lane);
+            });
         });
 
         document.getElementById('start-btn').addEventListener('click', startGame);
@@ -432,5 +431,3 @@
     </script>
 </body>
 </html>
-
-```
