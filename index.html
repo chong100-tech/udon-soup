@@ -59,7 +59,6 @@
         .value { font-size: 17px; font-weight: bold; color: var(--secondary); }
         .miss-value { font-size: 17px; font-weight: bold; color: #f44336; }
 
-        /* 動画代わりのCMアニメーションステージ */
         .stage-container {
             position: relative;
             height: 190px;
@@ -73,7 +72,6 @@
             overflow: hidden;
         }
 
-        /* CM風のスポットライト光線エフェクト */
         .spotlight {
             position: absolute;
             top: -50%; left: 50%;
@@ -100,7 +98,6 @@
         }
         .bowl-text { font-size: 12px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
 
-        /* 動物・ダンサーたちのCMアニメーション */
         .dancers-stage {
             position: relative;
             width: 100%;
@@ -136,7 +133,6 @@
             color: var(--secondary);
         }
 
-        /* CM特有のリズムダンス（1体ずつ少しズレて踊る） */
         @keyframes danceLeftRight {
             0% { transform: translateY(0) rotate(-12deg) scale(0.95); }
             50% { transform: translateY(-12px) rotate(0deg) scale(1.1); }
@@ -149,7 +145,6 @@
         .dancing .dancer-card:nth-child(4) { animation: danceLeftRight 0.4s 0.24s infinite alternate ease-in-out; }
         .dancing .dancer-card:nth-child(5) { animation: danceLeftRight 0.4s 0.32s infinite alternate ease-in-out; }
 
-        /* 5レーンプレイエリア */
         .play-area {
             position: relative; flex: 1;
             display: flex; justify-content: space-between;
@@ -336,6 +331,7 @@
         
         const lanes = document.querySelectorAll('.lane');
 
+        // 音量大きめ＆PERFECT/GOOD/MISS別の効果音生成関数
         let audioCtx = null;
         function playSound(type) {
             try {
@@ -348,19 +344,29 @@
                 gain.connect(audioCtx.destination);
 
                 const now = audioCtx.currentTime;
-                if (type === 'success') {
+                if (type === 'perfect') {
+                    // PERFECT：明るい高音の2音和音（ピピッ♪）音量大
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(587.33, now);
-                    osc.frequency.setValueAtTime(880.00, now + 0.08);
-                    gain.gain.setValueAtTime(0.15, now);
+                    osc.frequency.setValueAtTime(659.25, now); // E5
+                    osc.frequency.setValueAtTime(987.77, now + 0.08); // B5
+                    gain.gain.setValueAtTime(0.4, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
                     osc.start(now);
                     osc.stop(now + 0.25);
+                } else if (type === 'good') {
+                    // GOOD：上品な中音（ポコッ♪）音量大
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440.00, now); // A4
+                    gain.gain.setValueAtTime(0.45, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
                 } else {
+                    // MISS（おてつき）：低いブーッ音 音量大
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(150, now);
-                    osc.frequency.setValueAtTime(100, now + 0.1);
-                    gain.gain.setValueAtTime(0.2, now);
+                    osc.frequency.setValueAtTime(130, now);
+                    osc.frequency.setValueAtTime(90, now + 0.1);
+                    gain.gain.setValueAtTime(0.5, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
                     osc.start(now);
                     osc.stop(now + 0.25);
@@ -451,7 +457,8 @@
                         }
                     }
 
-                    if (elapsed > obj.targetTime + 0.35) {
+                    // 判定ラインを通り過ぎた場合の見逃し判定
+                    if (elapsed > obj.targetTime + 0.25) {
                         obj.hit = true;
                         obj.el.style.opacity = '0.2';
                         if (obj.type === obj.lane) {
@@ -480,34 +487,41 @@
             
             let hitFound = false;
 
-            activeNotes.forEach((obj) => {
+            // 連打防止のため、まだ判定されていないノーツのみを対象に、最もタイミングの近いものを1つだけ処理
+            for (let obj of activeNotes) {
                 if (obj.lane === laneIndex && !obj.hit) {
                     const diff = Math.abs(obj.targetTime - elapsed);
-                    if (diff < 0.35) {
+                    if (diff < 0.30) { // 判定範囲内
                         hitFound = true;
-                        obj.hit = true;
+                        obj.hit = true; // 一度判定されたらマークして連打を無効化
                         obj.el.remove();
 
                         if (obj.type === laneIndex) {
-                            if (diff < 0.15) {
+                            if (diff < 0.09) {
+                                // 線の真ん中付近：PERFECT
                                 score += 300; combo++;
                                 perfectCount++;
                                 showFeedback('PERFECT!', '#ffeb3b');
+                                playSound('perfect');
                             } else {
+                                // 触れているが中央ではない：GOOD
                                 score += 100; combo++;
                                 goodCount++;
                                 showFeedback('GOOD', '#8bc34a');
+                                playSound('good');
                             }
                             document.getElementById('score').innerText = score;
                             document.getElementById('combo').innerText = combo;
-                            playSound('success');
                         } else {
+                            // 違うおかずが来ているレーンだった場合
                             handleMiss();
                         }
+                        break; // 1回のタップにつき1ノーツのみ処理
                     }
                 }
-            });
+            }
 
+            // 近くにノーツが無いのにタップした場合（おてつき）
             if (!hitFound) {
                 handleMiss();
             }
@@ -524,7 +538,6 @@
         }
 
         function showFeedback(text, color) {
-            const fb = document.getElementById('fb');
             const feedbackEl = document.getElementById('feedback');
             feedbackEl.innerText = text;
             feedbackEl.style.color = color;
