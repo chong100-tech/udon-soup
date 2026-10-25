@@ -152,7 +152,7 @@
             font-size: 11px; font-weight: bold; color: #fff;
             border: 2px solid rgba(255,255,255,0.8); z-index: 5;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-            display: none; /* 初期状態は非表示 */
+            top: -50px;
         }
         
         #feedback {
@@ -259,34 +259,34 @@
 
     <script>
         const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
-        const START_DELAY = 8.0; // 8秒後に最初のノーツが到着
+        const START_DELAY = 8.0; // 8秒後に最初のノーツが判定ラインへ到着
 
-        // 譜面データ（8秒後からスタートするように設定）
-        const SONG_NOTES = [
-            { time: START_DELAY + 0.0, lane: 0, text: "きつね" },
-            { time: START_DELAY + 1.2, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 2.4, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 3.6, lane: 3, text: "たぬき" }, // ダミー
-            { time: START_DELAY + 4.8, lane: 3, text: "つきみ" },
-            { time: START_DELAY + 6.0, lane: 4, text: "おにく" },
-            { time: START_DELAY + 7.5, lane: 0, text: "おにく" }, // ダミー
-            { time: START_DELAY + 9.0, lane: 0, text: "きつね" },
-            { time: START_DELAY + 10.2, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 11.4, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 12.6, lane: 3, text: "つきみ" },
-            { time: START_DELAY + 13.8, lane: 4, text: "おにく" },
-            { time: START_DELAY + 15.5, lane: 1, text: "きつね" }, // ダミー
-            { time: START_DELAY + 16.7, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 17.9, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 19.5, lane: 4, text: "おにく" },
-            { time: START_DELAY + 21.0, lane: 0, text: "きつね" },
-            { time: START_DELAY + 22.5, lane: 3, text: "つきみ" }
+        // 判定タイミング（秒数）の設定
+        const RAW_TIMINGS = [
+            { t: 0.0, lane: 0, text: "きつね" },
+            { t: 1.2, lane: 1, text: "たぬき" },
+            { t: 2.4, lane: 2, text: "てんぷら" },
+            { t: 3.6, lane: 3, text: "たぬき" }, // ダミー
+            { t: 4.8, lane: 3, text: "つきみ" },
+            { t: 6.0, lane: 4, text: "おにく" },
+            { t: 7.5, lane: 0, text: "おにく" }, // ダミー
+            { t: 9.0, lane: 0, text: "きつね" },
+            { t: 10.2, lane: 1, text: "たぬき" },
+            { t: 11.4, lane: 2, text: "てんぷら" },
+            { t: 12.6, lane: 3, text: "つきみ" },
+            { t: 13.8, lane: 4, text: "おにく" },
+            { t: 15.5, lane: 1, text: "きつね" }, // ダミー
+            { t: 16.7, lane: 1, text: "たぬき" },
+            { t: 17.9, lane: 2, text: "てんぷら" },
+            { t: 19.5, lane: 4, text: "おにく" },
+            { t: 21.0, lane: 0, text: "きつね" },
+            { t: 22.5, lane: 3, text: "つきみ" }
         ];
 
         const MAX_MISS_ALLOWED = 20;
         let score = 0, combo = 0, missCount = 0;
         let gameActive = false, startTime = 0;
-        let activeNotes = [], noteElements = [], animId = null, countdownTimer = null;
+        let activeNotes = [], countdownTimer = null, animId = null;
         
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
@@ -306,28 +306,34 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
 
-            noteElements.forEach(n => n.el.remove());
-            noteElements = [];
+            // 既存ノーツの消去
+            document.querySelectorAll('.note').forEach(el => el.remove());
 
-            activeNotes = JSON.parse(JSON.stringify(SONG_NOTES));
-            activeNotes.forEach((note, index) => {
+            // ノーツデータの初期化
+            activeNotes = RAW_TIMINGS.map((item, index) => {
+                const targetTime = START_DELAY + item.t;
                 const el = document.createElement('div');
                 el.className = 'note';
-                el.innerText = note.text;
-                lanes[note.lane].appendChild(el);
-                noteElements.push({ index, el, hit: false, lane: note.lane, text: note.text, targetTime: note.time });
+                el.innerText = item.text;
+                lanes[item.lane].appendChild(el);
+                return {
+                    index,
+                    el,
+                    hit: false,
+                    lane: item.lane,
+                    text: item.text,
+                    targetTime: targetTime
+                };
             });
 
             // 音源再生
             defaultAudio.currentTime = 0;
             defaultAudio.play().catch(err => console.log(err));
 
-            // ダンス開始
-            dancers.forEach((d) => {
-                d.classList.add('cm-dancing');
-            });
+            // ダンスアニメーション開始
+            dancers.forEach((d) => d.classList.add('cm-dancing'));
 
-            // 8秒カウントダウン表示
+            // 8秒カウントダウン
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
             let timeLeft = 8;
@@ -353,26 +359,28 @@
         function updateGame() {
             if (!gameActive) return;
             const elapsed = (performance.now() - startTime) / 1000;
-            const areaHeight = lanes[0].clientHeight;
+            const playAreaHeight = lanes[0].clientHeight;
+            const fallDuration = 2.0; // ノーツが落ちきるまでの時間（2秒）
 
             activeNotes.forEach((obj) => {
                 if (obj.hit) return;
 
-                // 2秒かけて上からターゲットラインまで落下
-                const fallDuration = 2.0;
                 const dropStartTime = obj.targetTime - fallDuration;
-                
+
                 if (elapsed >= dropStartTime) {
-                    obj.el.style.display = 'flex'; // 落ちるタイミングで表示
-                    const progress = (elapsed - dropStartTime) / fallDuration;
-                    const pos = areaHeight - (progress * (areaHeight - 75));
+                    const progress = (elapsed - dropStartTime) / fallDuration; // 0.0 ～ 1.0 (判定ライン到達)
+                    const targetLineOffset = 75; // 判定ラインのbottom(px)
+                    const totalTravel = playAreaHeight - targetLineOffset;
                     
-                    if (progress <= 1.2) {
-                        obj.el.style.bottom = pos + 'px';
+                    // 上端(0px)から判定ライン(totalTravel px)まで落下位置計算
+                    const currentTop = progress * totalTravel;
+
+                    if (progress <= 1.25) {
+                        obj.el.style.top = currentTop + 'px';
                     }
                 }
 
-                // 通り過ぎた場合（ミス判定）
+                // 判定ラインを大幅に通り過ぎた場合（見逃しMISS）
                 if (elapsed > obj.targetTime + 0.35) {
                     obj.hit = true;
                     obj.el.style.opacity = '0.2';
@@ -387,8 +395,8 @@
                 return;
             }
 
-            const lastNoteTime = SONG_NOTES[SONG_NOTES.length - 1].time;
-            if (elapsed > lastNoteTime + 3.0) {
+            const lastTargetTime = activeNotes[activeNotes.length - 1].targetTime;
+            if (elapsed > lastTargetTime + 3.0) {
                 endGame(true);
                 return;
             }
@@ -455,9 +463,7 @@
             if (countdownTimer) clearInterval(countdownTimer);
             defaultAudio.pause();
 
-            dancers.forEach(d => {
-                d.classList.remove('cm-dancing');
-            });
+            dancers.forEach(d => d.classList.remove('cm-dancing'));
 
             const titleEl = document.getElementById('result-title');
             const detailEl = document.getElementById('res-detail');
