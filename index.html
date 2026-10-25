@@ -104,20 +104,11 @@
             white-space: nowrap;
         }
 
-        /* CM風ダンス：左から登場して、ずっとクネクネ踊り続けるループアニメーション */
-        @keyframes cmEnter {
-            0% { transform: translateX(-150px) scale(0.8); opacity: 0; }
-            100% { transform: translateX(0) scale(1); opacity: 1; }
-        }
-
+        /* CM風ダンス：ループクネクネアニメーション */
         @keyframes cmContinuousDance {
             0% { transform: translateY(0) rotate(-10deg) scale(0.95); }
             50% { transform: translateY(-8px) rotate(0deg) scale(1.05); }
             100% { transform: translateY(0) rotate(10deg) scale(0.95); }
-        }
-
-        .cm-entering {
-            animation: cmEnter 0.6s ease-out forwards;
         }
 
         .cm-dancing {
@@ -161,6 +152,7 @@
             font-size: 11px; font-weight: bold; color: #fff;
             border: 2px solid rgba(255,255,255,0.8); z-index: 5;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            display: none; /* 初期状態は非表示 */
         }
         
         #feedback {
@@ -269,26 +261,26 @@
         const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
         const START_DELAY = 8.0; // 8秒後に最初のノーツが到着
 
-        // 8秒後を起点とした譜面データ
+        // 譜面データ（8秒後からスタートするように設定）
         const SONG_NOTES = [
             { time: START_DELAY + 0.0, lane: 0, text: "きつね" },
-            { time: START_DELAY + 1.0, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 2.0, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 3.0, lane: 3, text: "たぬき" }, 
-            { time: START_DELAY + 4.0, lane: 3, text: "つきみ" },
-            { time: START_DELAY + 5.0, lane: 4, text: "おにく" },
-            { time: START_DELAY + 6.5, lane: 0, text: "おにく" }, 
-            { time: START_DELAY + 7.5, lane: 0, text: "きつね" },
-            { time: START_DELAY + 8.5, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 9.5, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 10.5, lane: 3, text: "つきみ" },
-            { time: START_DELAY + 11.5, lane: 4, text: "おにく" },
-            { time: START_DELAY + 13.0, lane: 1, text: "きつね" }, 
-            { time: START_DELAY + 14.0, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 15.0, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 16.5, lane: 4, text: "おにく" },
-            { time: START_DELAY + 18.0, lane: 0, text: "きつね" },
-            { time: START_DELAY + 19.0, lane: 3, text: "つきみ" }
+            { time: START_DELAY + 1.2, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 2.4, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 3.6, lane: 3, text: "たぬき" }, // ダミー
+            { time: START_DELAY + 4.8, lane: 3, text: "つきみ" },
+            { time: START_DELAY + 6.0, lane: 4, text: "おにく" },
+            { time: START_DELAY + 7.5, lane: 0, text: "おにく" }, // ダミー
+            { time: START_DELAY + 9.0, lane: 0, text: "きつね" },
+            { time: START_DELAY + 10.2, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 11.4, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 12.6, lane: 3, text: "つきみ" },
+            { time: START_DELAY + 13.8, lane: 4, text: "おにく" },
+            { time: START_DELAY + 15.5, lane: 1, text: "きつね" }, // ダミー
+            { time: START_DELAY + 16.7, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 17.9, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 19.5, lane: 4, text: "おにく" },
+            { time: START_DELAY + 21.0, lane: 0, text: "きつね" },
+            { time: START_DELAY + 22.5, lane: 3, text: "つきみ" }
         ];
 
         const MAX_MISS_ALLOWED = 20;
@@ -330,21 +322,12 @@
             defaultAudio.currentTime = 0;
             defaultAudio.play().catch(err => console.log(err));
 
-            // 左から登場してループダンス開始
-            dancers.forEach((d, idx) => {
-                d.classList.remove('cm-entering', 'cm-dancing');
-                // 順番に左から滑らかに登場
-                setTimeout(() => {
-                    d.classList.add('cm-entering');
-                    // 登場が終わったらループダンスへ移行
-                    setTimeout(() => {
-                        d.classList.remove('cm-entering');
-                        d.classList.add('cm-dancing');
-                    }, 600);
-                }, idx * 120);
+            // ダンス開始
+            dancers.forEach((d) => {
+                d.classList.add('cm-dancing');
             });
 
-            // 8秒カウントダウン
+            // 8秒カウントダウン表示
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
             let timeLeft = 8;
@@ -375,11 +358,12 @@
             activeNotes.forEach((obj) => {
                 if (obj.hit) return;
 
-                // 2秒かけて上からターゲットラインまで落下するように計算
+                // 2秒かけて上からターゲットラインまで落下
                 const fallDuration = 2.0;
                 const dropStartTime = obj.targetTime - fallDuration;
                 
                 if (elapsed >= dropStartTime) {
+                    obj.el.style.display = 'flex'; // 落ちるタイミングで表示
                     const progress = (elapsed - dropStartTime) / fallDuration;
                     const pos = areaHeight - (progress * (areaHeight - 75));
                     
@@ -472,7 +456,7 @@
             defaultAudio.pause();
 
             dancers.forEach(d => {
-                d.classList.remove('cm-entering', 'cm-dancing');
+                d.classList.remove('cm-dancing');
             });
 
             const titleEl = document.getElementById('result-title');
