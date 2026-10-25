@@ -242,8 +242,9 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
-                8秒のカウントダウン後、約2分19秒の曲に合わせて具材が流れます！<br>
-                <b>MISSが20回</b>に達する前に、最後まで生き残って完走しよう！
+                8秒間のカウントダウン後、曲に合わせて具材が流れます！<br>
+                レーンに一致する具材をタップして完走しよう。<br>
+                <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
@@ -258,17 +259,18 @@
 
     <script>
         const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
-        const START_DELAY = 8.0; // 8秒のカウントダウン後に最初のノーツがスタート
+        
+        // カウントダウン8秒 ＋ ノーツ落下演出時間2秒 ＝ 10秒に設定し、カウントダウン終了（START!）と同時に最初のノーツが落下開始するように完全同期
+        const START_DELAY = 10.0; 
 
-        // 曲の長さ（約2分19秒 ＝ 139秒）に合わせて、うどんかぞえうたの具材パターンをループ展開
         const basePattern = [
             { t: 0.0, lane: 0, text: "きつね" },
             { t: 1.5, lane: 1, text: "たぬき" },
             { t: 3.0, lane: 2, text: "てんぷら" },
-            { t: 4.5, lane: 3, text: "たぬき" }, // ダミー
+            { t: 4.5, lane: 3, text: "たぬき" }, 
             { t: 6.0, lane: 3, text: "つきみ" },
             { t: 7.5, lane: 4, text: "おにく" },
-            { t: 9.5, lane: 0, text: "おにく" }, // ダミー
+            { t: 9.5, lane: 0, text: "おにく" }, 
             { t: 11.0, lane: 0, text: "きつね" },
             { t: 12.5, lane: 1, text: "たぬき" },
             { t: 14.0, lane: 2, text: "てんぷら" },
@@ -276,7 +278,6 @@
             { t: 17.0, lane: 4, text: "おにく" }
         ];
 
-        // 2分19秒（約139秒）の間、リズムよく具材が繰り返し落ちてくるように自動生成
         let RAW_TIMINGS = [];
         for (let i = 0; i < 10; i++) {
             basePattern.forEach(note => {
@@ -287,7 +288,6 @@
                 });
             });
         }
-        // 最後のフィナーレ用ノーツ
         RAW_TIMINGS.push({ t: 136.0, lane: 0, text: "きつね" });
         RAW_TIMINGS.push({ t: 137.0, lane: 2, text: "てんぷら" });
         RAW_TIMINGS.push({ t: 138.0, lane: 4, text: "おにく" });
