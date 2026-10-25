@@ -59,7 +59,6 @@
         .value { font-size: 17px; font-weight: bold; color: var(--secondary); }
         .miss-value { font-size: 17px; font-weight: bold; color: #f44336; }
 
-        /* ステージ＆ダンサー演出（どんぶり上部、動物たち下部） */
         .stage-container {
             position: relative;
             height: 190px;
@@ -105,23 +104,24 @@
             white-space: nowrap;
         }
 
-        /* CM風：左から右への行進＆クネクネダンスアニメーション */
-        @keyframes cmWalkAndDance {
-            0% { transform: translateX(-120px) translateY(5px) rotate(-15deg); opacity: 0; }
-            30% { transform: translateX(0px) translateY(0px) rotate(0deg); opacity: 1; }
-            40% { transform: translateY(-5px) rotate(-8deg) scale(0.95); }
-            60% { transform: translateY(5px) rotate(8deg) scale(1.05); }
-            80% { transform: translateY(-5px) rotate(-8deg) scale(0.95); }
-            100% { transform: translateY(5px) rotate(8deg) scale(1.05); }
+        /* CM風ダンス：左から登場して、ずっとクネクネ踊り続けるループアニメーション */
+        @keyframes cmEnter {
+            0% { transform: translateX(-150px) scale(0.8); opacity: 0; }
+            100% { transform: translateX(0) scale(1); opacity: 1; }
         }
 
-        .cm-active {
-            animation: cmWalkAndDance 0.8s ease-out forwards, cmDanceLoop 0.4s infinite alternate ease-in-out 0.8s;
+        @keyframes cmContinuousDance {
+            0% { transform: translateY(0) rotate(-10deg) scale(0.95); }
+            50% { transform: translateY(-8px) rotate(0deg) scale(1.05); }
+            100% { transform: translateY(0) rotate(10deg) scale(0.95); }
         }
 
-        @keyframes cmDanceLoop {
-            0% { transform: translateY(-3px) rotate(-10deg) scale(0.95); }
-            100% { transform: translateY(3px) rotate(10deg) scale(1.05); }
+        .cm-entering {
+            animation: cmEnter 0.6s ease-out forwards;
+        }
+
+        .cm-dancing {
+            animation: cmContinuousDance 0.38s infinite alternate ease-in-out;
         }
 
         .jump {
@@ -267,27 +267,28 @@
 
     <script>
         const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
-        const START_DELAY = 8.0; // 8秒後にノーツ開始に変更
+        const START_DELAY = 8.0; // 8秒後に最初のノーツが到着
 
+        // 8秒後を起点とした譜面データ
         const SONG_NOTES = [
-            { time: START_DELAY + 1.0, lane: 0, text: "きつね" },
-            { time: START_DELAY + 2.0, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 3.0, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 4.0, lane: 3, text: "たぬき" }, 
-            { time: START_DELAY + 5.0, lane: 3, text: "つきみ" },
-            { time: START_DELAY + 6.0, lane: 4, text: "おにく" },
-            { time: START_DELAY + 7.5, lane: 0, text: "おにく" }, 
-            { time: START_DELAY + 8.5, lane: 0, text: "きつね" },
-            { time: START_DELAY + 9.5, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 10.5, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 11.5, lane: 3, text: "つきみ" },
-            { time: START_DELAY + 12.5, lane: 4, text: "おにく" },
-            { time: START_DELAY + 14.0, lane: 1, text: "きつね" }, 
-            { time: START_DELAY + 15.0, lane: 1, text: "たぬき" },
-            { time: START_DELAY + 16.0, lane: 2, text: "てんぷら" },
-            { time: START_DELAY + 17.5, lane: 4, text: "おにく" },
-            { time: START_DELAY + 19.0, lane: 0, text: "きつね" },
-            { time: START_DELAY + 20.0, lane: 3, text: "つきみ" }
+            { time: START_DELAY + 0.0, lane: 0, text: "きつね" },
+            { time: START_DELAY + 1.0, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 2.0, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 3.0, lane: 3, text: "たぬき" }, 
+            { time: START_DELAY + 4.0, lane: 3, text: "つきみ" },
+            { time: START_DELAY + 5.0, lane: 4, text: "おにく" },
+            { time: START_DELAY + 6.5, lane: 0, text: "おにく" }, 
+            { time: START_DELAY + 7.5, lane: 0, text: "きつね" },
+            { time: START_DELAY + 8.5, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 9.5, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 10.5, lane: 3, text: "つきみ" },
+            { time: START_DELAY + 11.5, lane: 4, text: "おにく" },
+            { time: START_DELAY + 13.0, lane: 1, text: "きつね" }, 
+            { time: START_DELAY + 14.0, lane: 1, text: "たぬき" },
+            { time: START_DELAY + 15.0, lane: 2, text: "てんぷら" },
+            { time: START_DELAY + 16.5, lane: 4, text: "おにく" },
+            { time: START_DELAY + 18.0, lane: 0, text: "きつね" },
+            { time: START_DELAY + 19.0, lane: 3, text: "つきみ" }
         ];
 
         const MAX_MISS_ALLOWED = 20;
@@ -329,13 +330,18 @@
             defaultAudio.currentTime = 0;
             defaultAudio.play().catch(err => console.log(err));
 
-            // CM風ダンス（左から右への行進＆クネクネダンス）を発動
+            // 左から登場してループダンス開始
             dancers.forEach((d, idx) => {
-                d.classList.remove('cm-active');
-                // 少しずつ時間をずらして左からわいわい行進してくる演出
+                d.classList.remove('cm-entering', 'cm-dancing');
+                // 順番に左から滑らかに登場
                 setTimeout(() => {
-                    d.classList.add('cm-active');
-                }, idx * 150);
+                    d.classList.add('cm-entering');
+                    // 登場が終わったらループダンスへ移行
+                    setTimeout(() => {
+                        d.classList.remove('cm-entering');
+                        d.classList.add('cm-dancing');
+                    }, 600);
+                }, idx * 120);
             });
 
             // 8秒カウントダウン
@@ -369,17 +375,26 @@
             activeNotes.forEach((obj) => {
                 if (obj.hit) return;
 
-                const progress = 1.0 - ((obj.targetTime - elapsed) / 2.0);
-                const pos = areaHeight - (progress * (areaHeight - 75));
+                // 2秒かけて上からターゲットラインまで落下するように計算
+                const fallDuration = 2.0;
+                const dropStartTime = obj.targetTime - fallDuration;
+                
+                if (elapsed >= dropStartTime) {
+                    const progress = (elapsed - dropStartTime) / fallDuration;
+                    const pos = areaHeight - (progress * (areaHeight - 75));
+                    
+                    if (progress <= 1.2) {
+                        obj.el.style.bottom = pos + 'px';
+                    }
+                }
 
-                if (obj.targetTime - elapsed < -0.35) {
+                // 通り過ぎた場合（ミス判定）
+                if (elapsed > obj.targetTime + 0.35) {
                     obj.hit = true;
                     obj.el.style.opacity = '0.2';
                     if (obj.text === INGREDIENTS[obj.lane]) {
                         handleMiss();
                     }
-                } else if (progress >= 0 && progress <= 1.5) {
-                    obj.el.style.bottom = pos + 'px';
                 }
             });
 
@@ -405,12 +420,12 @@
             activeNotes.forEach((obj) => {
                 if (obj.lane === laneIndex && !obj.hit) {
                     const diff = Math.abs(obj.targetTime - elapsed);
-                    if (diff < 0.3) {
+                    if (diff < 0.35) {
                         obj.hit = true;
                         obj.el.remove();
 
                         if (obj.text === targetIngredient) {
-                            if (diff < 0.12) {
+                            if (diff < 0.15) {
                                 score += 300; combo++;
                                 showFeedback('PERFECT!', '#ffeb3b');
                             } else {
@@ -456,7 +471,9 @@
             if (countdownTimer) clearInterval(countdownTimer);
             defaultAudio.pause();
 
-            dancers.forEach(d => d.classList.remove('cm-active'));
+            dancers.forEach(d => {
+                d.classList.remove('cm-entering', 'cm-dancing');
+            });
 
             const titleEl = document.getElementById('result-title');
             const detailEl = document.getElementById('res-detail');
