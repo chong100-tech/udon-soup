@@ -1,29 +1,3 @@
-ご要望の通り、以下の改善・調整をすべて実装した最新の完全版コードを作成しました！
-
-### 🔧 今回の主な変更点
-
-1. **おかず（ノーツ）を画像・アイコンに変更**:
-* 従来のテキスト（「きつね」など）から、CMに登場する可愛いアイコン・絵文字（🦊狐、🦝たぬき、🍤天ぷら、🥚月見、🥩お肉）に置き換え、視覚的に分かりやすくしました。
-
-
-2. **おてつき判定の追加**:
-* ノーツが近くにないタイミングや、関係ない場所をタップしてしまった場合も、すべて厳しく **MISS**（ミス判定・ミス残数が減少）するように判定を強化しました。
-
-
-3. **効果音（サウンドエフェクト）の実装**:
-* Web Audio API（ブラウザ標準機能）を組み込み、**成功時（PERFECT/GOOD）は明るい「ピピッ」という高音の効果音**、**MISS（おてつきや見逃し）時は「ブーッ」という低音のエフェクト音**が鳴るようにしました（外部の音声ファイル不要ですぐに鳴ります）。
-
-
-4. **ゲーム全体の時間管理（8秒カウント込みで2分15秒）**:
-* 「ゲームスタート！」を押した瞬間からの経過時間（8秒のカウントダウン＋135秒の曲の長さ＝合計143秒）を正確に計測し、2分15秒（8秒のカウントを含む）でぴったり曲とゲームが終了するように調整しました。
-
-
-
----
-
-### 📄 完全版コード（`index.html` に上書き保存してください）
-
-```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -88,7 +62,7 @@
         .stage-container {
             position: relative;
             height: 190px;
-            background: #111;
+            background: #000;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -139,7 +113,6 @@
             background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4;
         }
         
-        /* 落ちてくるアイコン/画像風ノーツ */
         .note {
             position: absolute; width: 90%; height: 44px; border-radius: 10px;
             background: linear-gradient(135deg, rgba(255,152,0,0.9), rgba(245,124,0,0.9));
@@ -203,9 +176,8 @@
         </div>
 
         <div class="stage-container">
-            <video class="bg-video" autoplay loop muted playsinline>
+            <video class="bg-video" autoplay loop muted playsinline preload="auto">
                 <source src="videoplayback.mp4" type="video/mp4">
-                お使いのブラウザは動画タグをサポートしていません。
             </video>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
         </div>
@@ -232,10 +204,10 @@
 
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
-            <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 10px;">
-                8秒間のカウントダウン後、曲に合わせて具材アイコンが流れます！<br>
-                レーンに一致する具材をタップして完走しよう。<br>
-                <b>おてつきやMISSが20回</b>に達するとゲームオーバーです。
+            <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 15px;">
+                レーンに一致する具材アイコンをタップしよう！<br>
+                違うおかずや関係ない場所を押すとMISSになります。<br>
+                <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
@@ -249,7 +221,6 @@
     </div>
 
     <script>
-        // 0: きつね(🦊), 1: たぬき(🦝), 2: てんぷら(🍤), 3: つきみ(🥚), 4: おにく(🥩)
         const INGREDIENTS = [
             { name: "きつね", icon: "🦊" },
             { name: "たぬき", icon: "🦝" },
@@ -258,8 +229,8 @@
             { name: "おにく", icon: "🥩" }
         ];
         
-        const START_DELAY = 10.0; // 8秒カウント ＋ 落下2秒
-        const TOTAL_GAME_DURATION = 143.0; // 8秒カウント込みで約2分15秒（143秒）
+        const START_DELAY = 10.0; 
+        const TOTAL_GAME_DURATION = 143.0; // 8秒カウント込みで2分15秒
 
         const basePattern = [
             { t: 0.0, lane: 0, type: 0 },
@@ -301,7 +272,6 @@
         const bgVideo = document.querySelector('.bg-video');
         const lanes = document.querySelectorAll('.lane');
 
-        // Web Audio APIによる効果音生成関数
         let audioCtx = null;
         function playSound(type) {
             try {
@@ -315,16 +285,14 @@
 
                 const now = audioCtx.currentTime;
                 if (type === 'success') {
-                    // 成功音：明るい高音ピピッ
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(587.33, now); // D5
-                    osc.frequency.setValueAtTime(880.00, now + 0.08); // A5
+                    osc.frequency.setValueAtTime(587.33, now);
+                    osc.frequency.setValueAtTime(880.00, now + 0.08);
                     gain.gain.setValueAtTime(0.15, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
                     osc.start(now);
                     osc.stop(now + 0.25);
                 } else {
-                    // ミス音（おてつき）：低いブー音
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(150, now);
                     osc.frequency.setValueAtTime(100, now + 0.1);
@@ -356,7 +324,7 @@
                 const targetTime = START_DELAY + item.t;
                 const el = document.createElement('div');
                 el.className = 'note';
-                el.innerText = INGREDIENTS[item.type].icon; // アイコン画像を表示
+                el.innerText = INGREDIENTS[item.type].icon;
                 lanes[item.lane].appendChild(el);
                 return {
                     index,
@@ -422,16 +390,17 @@
                         }
                     }
 
-                    // 見逃しMISS判定
+                    // 【修正】自分のレーンに「自分のレーンと同じおかず」が来て見逃した場合のみMISSにする
                     if (elapsed > obj.targetTime + 0.35) {
                         obj.hit = true;
                         obj.el.style.opacity = '0.2';
-                        handleMiss();
+                        if (obj.type === obj.lane) {
+                            handleMiss();
+                        }
                     }
                 }
             });
 
-            // 2分15秒（TOTAL_GAME_DURATION）経過またはMISS上限
             if (missCount >= MAX_MISS_ALLOWED || elapsed >= TOTAL_GAME_DURATION) {
                 endGame(missCount < MAX_MISS_ALLOWED);
                 return;
@@ -450,7 +419,6 @@
             const elapsed = (performance.now() - startTime) / 1000;
             
             let hitFound = false;
-            let correctHit = false;
 
             activeNotes.forEach((obj) => {
                 if (obj.lane === laneIndex && !obj.hit) {
@@ -460,9 +428,8 @@
                         obj.hit = true;
                         obj.el.remove();
 
-                        // 正しい具材アイコンがレーンに一致しているか
+                        // 正しいおかずなら成功、違うおかずならミス
                         if (obj.type === laneIndex) {
-                            correctHit = true;
                             if (diff < 0.15) {
                                 score += 300; combo++;
                                 showFeedback('PERFECT!', '#ffeb3b');
@@ -474,14 +441,13 @@
                             document.getElementById('combo').innerText = combo;
                             playSound('success');
                         } else {
-                            // 違う具材アイコンが来ているレーンで押した（不一致）
                             handleMiss();
                         }
                     }
                 }
             });
 
-            // おてつき判定（近くにノーツが無いのにボタンを押した場合）
+            // 近くにノーツが無いのにタップした場合（おてつき）
             if (!hitFound) {
                 handleMiss();
             }
@@ -546,5 +512,3 @@
     </script>
 </body>
 </html>
-
-```
