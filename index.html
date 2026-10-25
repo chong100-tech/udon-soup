@@ -259,10 +259,9 @@
 
     <script>
         const INGREDIENTS = ["きつね", "たぬき", "てんぷら", "つきみ", "おにく"];
-        
-        // カウントダウン8秒 ＋ ノーツ落下演出時間2秒 ＝ 10秒に設定し、カウントダウン終了（START!）と同時に最初のノーツが落下開始するように完全同期
-        const START_DELAY = 10.0; 
+        const START_DELAY = 10.0; // 8秒のカウントダウン ＋ ノーツ落下2秒
 
+        // 基準となるパターン
         const basePattern = [
             { t: 0.0, lane: 0, text: "きつね" },
             { t: 1.5, lane: 1, text: "たぬき" },
@@ -272,25 +271,27 @@
             { t: 7.5, lane: 4, text: "おにく" },
             { t: 9.5, lane: 0, text: "おにく" }, 
             { t: 11.0, lane: 0, text: "きつね" },
-            { t: 12.5, lane: 1, text: "たぬき" },
-            { t: 14.0, lane: 2, text: "てんぷら" },
-            { t: 15.5, lane: 3, text: "つきみ" },
-            { t: 17.0, lane: 4, text: "おにく" }
+            { t: 12.5, lane: 1, text: "たぬき" }
         ];
 
+        // 2分15秒（135秒）に収まるようにループ展開
         let RAW_TIMINGS = [];
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0x0; i < 12; i++) {
             basePattern.forEach(note => {
-                RAW_TIMINGS.push({
-                    t: note.t + (i * 13.5),
-                    lane: note.lane,
-                    text: note.text
-                });
+                let timing = note.t + (i * 11.0);
+                if (timing < 130.0) {
+                    RAW_TIMINGS.push({
+                        t: timing,
+                        lane: note.lane,
+                        text: note.text
+                    });
+                }
             });
         }
-        RAW_TIMINGS.push({ t: 136.0, lane: 0, text: "きつね" });
-        RAW_TIMINGS.push({ t: 137.0, lane: 2, text: "てんぷら" });
-        RAW_TIMINGS.push({ t: 138.0, lane: 4, text: "おにく" });
+        // 最後のフィナーレ用ノーツ（2分15秒＝135秒の手前で完走）
+        RAW_TIMINGS.push({ t: 131.0, lane: 0, text: "きつね" });
+        RAW_TIMINGS.push({ t: 132.2, lane: 1, text: "たぬき" });
+        RAW_TIMINGS.push({ t: 133.4, lane: 2, text: "てんぷら" });
 
         const MAX_MISS_ALLOWED = 20;
         let score = 0, combo = 0, missCount = 0;
