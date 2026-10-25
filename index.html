@@ -161,7 +161,6 @@
             font-size: 9px; font-weight: bold; color: #ffca28; margin-top: 5px; opacity: 0.85;
             background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 4px;
         }
-        /* 判定ライン（黄色の線）を少し高めに設定し、底を限界まで下に下げました */
         .target-line {
             position: absolute; bottom: 130px; width: 100%; height: 6px;
             background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4;
@@ -439,7 +438,7 @@
             const elapsed = (performance.now() - startTime) / 1000;
             const playAreaHeight = lanes[0].clientHeight;
             const fallDuration = 2.0;
-            const targetLineBottom = 130; // 判定ライン（黄色の線）の下からの高さ
+            const targetLineBottom = 130; 
 
             let allCleared = true;
 
@@ -458,15 +457,14 @@
                         }
                     }
 
-                    // おかずが判定ラインを完全に通り過ぎ、操作ボタン手前の最下部まで落ちた場合（見逃しMISS）
                     const targetLinePixelFromTop = playAreaHeight - targetLineBottom;
                     const noteTop = parseFloat(obj.el.style.top) || -50;
                     const noteBottom = noteTop + 44;
 
-                    // ラインを通り過ぎてさらに下に落ちたとき（MISS判定）
-                    if (noteBottom > targetLinePixelFromTop + 80) {
-                        obj.removed = true;
-                        obj.el.remove();
+                    // 完全に線の下を通り過ぎたとき（見逃しMISS）
+                    if (noteBottom > targetLinePixelFromTop + 50) {
+                        obj.removed = true; // ★二重判定防止フラグをON
+                        obj.el.remove();    // ★即座にDOM要素を完全削除
                         
                         if (obj.type === obj.lane) {
                             handleMiss();
@@ -492,7 +490,7 @@
             if (!gameActive || isCountingDown) return;
             
             const playAreaHeight = lanes[0].clientHeight;
-            const targetLinePixelFromTop = playAreaHeight - 130; // 黄色の線の中央位置
+            const targetLinePixelFromTop = playAreaHeight - 130; 
 
             let hitFound = false;
 
@@ -508,8 +506,8 @@
                     // タップ可能な許容範囲（線に触れている状態：上下に約45px以内）
                     if (absDistance <= 45) {
                         hitFound = true;
-                        obj.removed = true; // ★判定済みフラグを立てて、このおかずへの連打や重複入力を完全ロック
-                        obj.el.remove();    // ★即座に消去
+                        obj.removed = true; // ★判定完了：このおかずへの入力を完全ロック（連打防止）
+                        obj.el.remove();    // ★即座にDOM削除（底でのMISS重複を100%防止）
 
                         if (obj.type === laneIndex) {
                             if (absDistance <= 12) {
