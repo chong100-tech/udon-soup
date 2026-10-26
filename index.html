@@ -168,7 +168,7 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 夕焼け＆右カーブ砂道・きつね後ろ姿エンディング演出 --- */
+        /* --- 夕焼け＆正確な右カーブ砂道・うしろ向きキツネのエンディング --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
@@ -216,7 +216,7 @@
             100% { stroke-dashoffset: -24; }
         }
 
-        /* 道路の中央に配置した「後ろ姿のきつね」 */
+        /* 道路の中央に完璧にセンター合わせした「うしろ向きキツネ（静止画）」 */
         .walking-troop {
             position: absolute; bottom: 105px; left: 50%;
             transform: translateX(-50%); z-index: 10;
@@ -226,11 +226,8 @@
             font-size: 38px; width: 48px; height: 48px;
             display: flex; align-items: center; justify-content: center;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
-            animation: foxBounce 0.6s infinite alternate ease-in-out;
-        }
-        @keyframes foxBounce {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-4px) scale(1.05); }
+            /* 背中を向けて奥を向いているように横向きの絵文字をフリップ＆微調整 */
+            transform: scaleX(-1);
         }
     </style>
 </head>
@@ -304,15 +301,17 @@
             <div class="white-cloud" style="top: 22%; width: 120px; height: 32px; animation-delay: 6s;"></div>
             <div class="white-cloud" style="top: 15%; width: 85px; height: 24px; animation-delay: 11s;"></div>
 
+            <!-- 草原と「右カーブ」砂道（キツネの配置軸と完全に一致させたパス） -->
             <div class="field-bg">
                 <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
-                    <path d="M 200 0 Q 150 150 380 300 L 100 300 Q 110 150 160 0 Z" fill="#d49a55" />
-                    <path class="road-line" d="M 163 0 Q 113 150 108 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
-                    <path class="road-line" d="M 197 0 Q 147 150 372 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
+                    <!-- 道の始まりのセンターを完全に中央に調整した右カーブ -->
+                    <path d="M 190 0 Q 150 150 380 300 L 110 300 Q 120 150 150 0 Z" fill="#d49a55" />
+                    <path class="road-line" d="M 170 0 Q 135 150 115 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
+                    <path class="road-line" d="M 180 0 Q 142 150 375 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
                 </svg>
             </div>
 
-            <!-- 中央の道路を背中を向けて奥へ走るきつね -->
+            <!-- 道の中央にぴったり配置したうしろ向きのキツネ（静止画） -->
             <div class="walking-troop">
                 <div class="fox-back">🦊</div>
             </div>
