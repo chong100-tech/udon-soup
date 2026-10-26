@@ -332,31 +332,25 @@
         let activeNotes = [], countdownTimer = null, animId = null;
         let resultTimeout = null;
         
-        const defaultAudio = new Audio('udon.mp3');
-        defaultAudio.volume = 0.9;
-
-        const endingAudio = new Audio('ending.mp3'); 
-        endingAudio.volume = 0.8;
+        // 1つのオーディオプレイヤーインスタンスを安全に使い回す仕組み
+        const bgm = new Audio();
+        bgm.volume = 0.9;
         
         const lanes = document.querySelectorAll('.lane');
 
-        // 音声ブロックを確実に解除するアンロック処理
-        function unlockAllAudio() {
-            defaultAudio.play().then(() => {
-                defaultAudio.pause();
-                defaultAudio.currentTime = 0;
+        // タップ時に音声をアンロックして準備完了にする
+        function unlockAudio() {
+            bgm.src = 'udon.mp3';
+            bgm.load();
+            bgm.play().then(() => {
+                bgm.pause();
+                bgm.currentTime = 0;
             }).catch(() => {});
-
-            endingAudio.play().then(() => {
-                endingAudio.pause();
-                endingAudio.currentTime = 0;
-            }).catch(() => {});
-
-            document.removeEventListener('click', unlockAllAudio);
-            document.removeEventListener('touchstart', unlockAllAudio);
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
         }
-        document.addEventListener('click', unlockAllAudio);
-        document.addEventListener('touchstart', unlockAllAudio);
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
 
         let audioCtx = null;
         function playSound(type) {
@@ -424,15 +418,18 @@
             if (countdownTimer) clearInterval(countdownTimer);
             if (resultTimeout) clearTimeout(resultTimeout);
             
-            defaultAudio.pause();
-            defaultAudio.currentTime = 0;
+            bgm.pause();
+            bgm.currentTime = 0;
 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
             
-            endingAudio.currentTime = 0;
-            endingAudio.play().catch(err => {
+            // ending.mp3 を再生
+            bgm.src = 'ending.mp3';
+            bgm.volume = 0.8;
+            bgm.currentTime = 0;
+            bgm.play().catch(err => {
                 console.log("ending.mp3再生エラー:", err);
             });
         }
@@ -441,9 +438,6 @@
             score = 0; combo = 0; missCount = 0;
             perfectCount = 0; goodCount = 0;
             if (resultTimeout) clearTimeout(resultTimeout);
-            
-            endingAudio.pause();
-            endingAudio.currentTime = 0;
 
             document.getElementById('score').innerText = '0';
             document.getElementById('combo').innerText = '0';
@@ -465,9 +459,11 @@
                 return { id: index, el: el, removed: false, lane: item.lane, type: item.type, targetTime: targetTime };
             });
 
-            // udon.mp3 の確実な再生
-            defaultAudio.currentTime = 0;
-            defaultAudio.play().catch(err => {
+            // udon.mp3 を再生
+            bgm.src = 'udon.mp3';
+            bgm.volume = 0.9;
+            bgm.currentTime = 0;
+            bgm.play().catch(err => {
                 console.log("udon.mp3再生エラー:", err);
             });
 
@@ -616,7 +612,7 @@
             isCountingDown = false;
             cancelAnimationFrame(animId);
             if (countdownTimer) clearInterval(countdownTimer);
-            defaultAudio.pause();
+            bgm.pause();
 
             const titleEl = document.getElementById('result-title');
             const detailEl = document.getElementById('res-detail');
@@ -653,11 +649,9 @@
         });
 
         document.getElementById('start-btn').addEventListener('click', () => {
-            unlockAllAudio();
             startGame();
         });
         document.getElementById('restart-btn').addEventListener('click', () => {
-            unlockAllAudio();
             startGame();
         });
     </script>
