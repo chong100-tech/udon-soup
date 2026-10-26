@@ -170,35 +170,59 @@
 
         /* --- 夕焼け＆緩やかな右カーブ砂道エンディング演出 --- */
         #ending-screen {
-            background: linear-gradient(180deg, #2b1055 0%, #7597de 50%, #b1532a 80%, #ff8e53 100%);
-            overflow: hidden; position: relative;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
+            overflow: hidden; z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
         }
 
-        /* 夕焼け雲 */
-        .cloud {
-            position: absolute; background: rgba(255, 230, 210, 0.35);
-            border-radius: 50px; filter: blur(4px);
-            animation: cloudMove 15s infinite linear; pointer-events: none;
+        /* 大きな夕日（太陽） */
+        .sun {
+            position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 120px; background: radial-gradient(circle, #fff 40%, #ffe082 70%, rgba(255,255,255,0) 100%);
+            border-radius: 50%; box-shadow: 0 0 40px #ffb300; pointer-events: none;
         }
+
+        /* 白い雲 */
+        .white-cloud {
+            position: absolute; background: #ffffff;
+            border-radius: 30px; opacity: 0.9;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            animation: cloudMove 16s infinite linear; pointer-events: none;
+        }
+        .white-cloud::before, .white-cloud::after {
+            content: ''; position: absolute; background: #ffffff; border-radius: 50%;
+        }
+        .white-cloud::before { width: 40px; height: 40px; top: -18px; left: 15px; }
+        .white-cloud::after { width: 30px; height: 30px; top: -12px; left: 42px; }
+
         @keyframes cloudMove {
-            0% { transform: translateX(-150px); }
-            100% { transform: translateX(500px); }
+            0% { transform: translateX(-160px); }
+            100% { transform: translateX(520px); }
         }
 
-        /* 遠近感のある草原 */
+        /* 地面（草原） */
         .field-bg {
-            position: absolute; bottom: 0; width: 100%; height: 55%;
-            background: #2d5a27; overflow: hidden;
+            position: absolute; bottom: 0; width: 100%; height: 58%;
+            background: #388e3c; overflow: hidden;
         }
 
-        /* 緩やかな右カーブの砂道 */
+        /* 右カーブ砂道とアニメーション点線 */
         .road-svg {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
         }
+        .road-line {
+            stroke-dasharray: 12 12;
+            animation: roadMove 0.8s infinite linear;
+        }
+        @keyframes roadMove {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -24; }
+        }
 
-        /* 道の中に綺麗に並ぶおかずたち（固定位置） */
+        /* 道幅に収まるおかずたち（アイコンのみ） */
         .walking-troop {
-            position: absolute; bottom: 125px; left: 50%;
+            position: absolute; bottom: 110px; left: 50%;
             transform: translateX(-50%); display: flex; gap: 8px;
             z-index: 10; align-items: center; justify-content: center;
         }
@@ -206,6 +230,11 @@
             font-size: 32px; width: 42px; height: 42px;
             display: flex; align-items: center; justify-content: center;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+        }
+
+        .ending-ui {
+            position: absolute; bottom: 25px; z-index: 20;
+            text-align: center; width: 100%;
         }
     </style>
 </head>
@@ -217,7 +246,7 @@
             <div class="miss-box"><div class="label">MISS残数</div><div id="miss-left" class="miss-value">20</div></div>
         </div>
 
-        <div class="stage-container">
+        <div class="stage-container" id="stage-container">
             <div class="spotlight"></div>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
             
@@ -272,23 +301,27 @@
         </div>
 
         <!-- 夕焼けエンディング画面 -->
-        <div id="ending-screen" class="overlay hidden">
-            <!-- 夕焼け雲 -->
-            <div class="cloud" style="top: 12%; width: 140px; height: 35px; animation-delay: 0s;"></div>
-            <div class="cloud" style="top: 25%; width: 190px; height: 45px; animation-delay: 5s;"></div>
-            <div class="cloud" style="top: 18%; width: 110px; height: 30px; animation-delay: 10s;"></div>
+        <div id="ending-screen" class="hidden">
+            <!-- 夕日 -->
+            <div class="sun"></div>
 
-            <!-- 草原と右カーブの砂道 -->
+            <!-- 白い雲 -->
+            <div class="white-cloud" style="top: 10%; width: 90px; height: 26px; animation-delay: 0s;"></div>
+            <div class="white-cloud" style="top: 22%; width: 120px; height: 32px; animation-delay: 6s;"></div>
+            <div class="white-cloud" style="top: 15%; width: 85px; height: 24px; animation-delay: 11s;"></div>
+
+            <!-- 草原と右カーブ砂道（点線の動き付き） -->
             <div class="field-bg">
                 <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
-                    <!-- 緩やかな右カーブの広々とした砂道 -->
-                    <path d="M 120 0 Q 350 120 450 300 L -30 300 Q 180 120 70 0 Z" fill="#d49a55" />
-                    <!-- 路面の模様（質感） -->
-                    <path d="M 120 0 Q 350 120 450 300" stroke="#b07b3a" stroke-width="4" fill="none" opacity="0.4" />
+                    <!-- 緩やかな右カーブの砂道 -->
+                    <path d="M 100 0 Q 300 100 440 300 L -40 300 Q 150 100 50 0 Z" fill="#d49a55" />
+                    <!-- 動く両サイドの点線車線 -->
+                    <path class="road-line" d="M 98 0 Q 295 100 435 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
+                    <path class="road-line" d="M 52 0 Q 155 100 -35 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
                 </svg>
             </div>
 
-            <!-- 道幅にすっぽり収まるおかずたち（アイコンのみ・名札丸枠なし） -->
+            <!-- 道の中を進むおかずたち -->
             <div class="walking-troop">
                 <div class="troop-item">🦊</div>
                 <div class="troop-item">🦝</div>
@@ -297,9 +330,9 @@
                 <div class="troop-item">🥩</div>
             </div>
 
-            <div style="position: absolute; bottom: 35px; z-index: 20; text-align: center; width: 100%;">
-                <h3 style="color: var(--secondary); font-size: 18px; margin-bottom: 5px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);">Starlit Journey</h3>
-                <p style="font-size: 11px; color: #fff; margin-bottom: 12px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">果てなき空は いつも自由だ</p>
+            <div class="ending-ui">
+                <h3 style="color: #fff; font-size: 18px; margin-bottom: 5px; text-shadow: 0 2px 6px rgba(0,0,0,0.6);">Starlit Journey</h3>
+                <p style="font-size: 11px; color: #fff; margin-bottom: 12px; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">果てなき空は いつも自由だ</p>
                 <button class="btn-main" id="ending-restart-btn" style="padding: 10px 25px; font-size: 15px;">タイトルへもどる</button>
             </div>
         </div>
@@ -333,7 +366,7 @@
         
         const lanes = document.querySelectorAll('.lane');
 
-        // ★画面のどこかを最初にタップした瞬間に、両方の音楽の再生権限を取得・準備★
+        // タップ時の自動権限アンロック
         function unlockAudioPermission() {
             defaultAudio.load();
             endingAudio.load();
@@ -416,10 +449,10 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
             
-            // ending.mp3 の自動再生
+            // ending.mp3 を再生
             endingAudio.currentTime = 0;
             endingAudio.play().catch(err => {
-                console.log("ending.mp3の再生エラー:", err);
+                console.log("ending.mp3再生エラー:", err);
             });
         }
 
