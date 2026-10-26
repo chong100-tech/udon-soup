@@ -168,7 +168,7 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 夕焼け＆緩やかな右カーブ砂道エンディング演出 --- */
+        /* --- 夕焼け＆右カーブ砂道エンディング演出 --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
@@ -207,7 +207,7 @@
             background: #388e3c; overflow: hidden;
         }
 
-        /* 右カーブ砂道とアニメーション点線 */
+        /* 手前中央始まり・奥が右に曲がる「右カーブ」砂道とアニメーション点線 */
         .road-svg {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
         }
@@ -220,22 +220,16 @@
             100% { stroke-dashoffset: -24; }
         }
 
-        /* ★おかずたちの配置幅調整（おにくもぴったり道内に収まるように間隔調整）★ */
+        /* 手前中央に完璧に整列するおかずたち */
         .walking-troop {
             position: absolute; bottom: 110px; left: 50%;
-            transform: translateX(-50%); display: flex; gap: 4px;
+            transform: translateX(-50%); display: flex; gap: 6px;
             z-index: 10; align-items: center; justify-content: center;
-            width: 85%;
         }
         .troop-item {
             font-size: 30px; width: 38px; height: 38px;
             display: flex; align-items: center; justify-content: center;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
-        }
-
-        .ending-ui {
-            position: absolute; bottom: 25px; z-index: 20;
-            text-align: center; width: 100%;
         }
     </style>
 </head>
@@ -311,28 +305,24 @@
             <div class="white-cloud" style="top: 22%; width: 120px; height: 32px; animation-delay: 6s;"></div>
             <div class="white-cloud" style="top: 15%; width: 85px; height: 24px; animation-delay: 11s;"></div>
 
-            <!-- 草原と右カーブ砂道（点線の動き付き） -->
+            <!-- 草原と手前中央スタートの右カーブ砂道 -->
             <div class="field-bg">
                 <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
-                    <path d="M 100 0 Q 300 100 440 300 L -40 300 Q 150 100 50 0 Z" fill="#d49a55" />
-                    <path class="road-line" d="M 98 0 Q 295 100 435 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
-                    <path class="road-line" d="M 52 0 Q 155 100 -35 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
+                    <!-- 奥に向かって右へ曲がっていく砂道 -->
+                    <path d="M 180 0 Q 380 150 370 300 L 110 300 Q 280 150 120 0 Z" fill="#d49a55" />
+                    <!-- 両サイドの動く白点線 -->
+                    <path class="road-line" d="M 178 0 Q 375 150 365 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
+                    <path class="road-line" d="M 122 0 Q 282 150 115 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
                 </svg>
             </div>
 
-            <!-- 道の中を進むおかずたち -->
+            <!-- 道の中を進むおかずたち（きつねは後ろ姿） -->
             <div class="walking-troop">
-                <div class="troop-item">🦊</div>
+                <div class="troop-item">🦊</div> <!-- 後ろ姿イメージのきつね -->
                 <div class="troop-item">🦝</div>
                 <div class="troop-item">🍤</div>
                 <div class="troop-item">🥚</div>
                 <div class="troop-item">🥩</div>
-            </div>
-
-            <div class="ending-ui">
-                <h3 style="color: #fff; font-size: 18px; margin-bottom: 5px; text-shadow: 0 2px 6px rgba(0,0,0,0.6);">Starlit Journey</h3>
-                <p style="font-size: 11px; color: #fff; margin-bottom: 12px; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">果てなき空は いつも自由だ</p>
-                <button class="btn-main" id="ending-restart-btn" style="padding: 10px 25px; font-size: 15px;">タイトルへもどる</button>
             </div>
         </div>
     </div>
@@ -365,8 +355,7 @@
         
         const lanes = document.querySelectorAll('.lane');
 
-        // ★最強の音声アンロック処理★
-        // ユーザーが画面を一度タップした際に ending.mp3 を一瞬鳴らしてブラウザ制限を完全に突破する
+        // 音声アンロック処理
         function unlockAllAudio() {
             defaultAudio.play().then(() => {
                 defaultAudio.pause();
@@ -457,7 +446,7 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
             
-            // ending.mp3 の自動再生
+            // ending.mp3 の再生
             endingAudio.currentTime = 0;
             const playPromise = endingAudio.play();
             if (playPromise !== undefined) {
@@ -679,7 +668,6 @@
             });
         });
 
-        // ボタン押し時にも確実に無音再生を通してアンロックを確定させる
         document.getElementById('start-btn').addEventListener('click', () => {
             unlockAllAudio();
             startGame();
@@ -691,12 +679,6 @@
         document.getElementById('restart-btn').addEventListener('click', () => {
             unlockAllAudio();
             startGame();
-        });
-        document.getElementById('ending-restart-btn').addEventListener('click', () => {
-            endingAudio.pause();
-            endingAudio.currentTime = 0;
-            document.getElementById('ending-screen').classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
         });
     </script>
 </body>
