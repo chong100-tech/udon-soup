@@ -218,6 +218,53 @@
             font-size: 56px; font-weight: bold; color: var(--secondary);
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
+
+        /* --- 流星の路（エンディング演出）専用スタイル --- */
+        #ending-screen {
+            background: linear-gradient(180deg, #0b0b1a 0%, #1a0b2e 100%);
+            overflow: hidden;
+        }
+        .shooting-star {
+            position: absolute;
+            width: 100px; height: 2px;
+            background: linear-gradient(90deg, #fff, transparent);
+            transform: rotate(-35deg);
+            opacity: 0;
+            animation: shoot 4s infinite linear;
+        }
+        @keyframes shoot {
+            0% { transform: translate(300px, -100px) rotate(-35deg); opacity: 1; }
+            30% { transform: translate(-200px, 200px) rotate(-35deg); opacity: 0; }
+            100% { transform: translate(-200px, 200px) rotate(-35deg); opacity: 0; }
+        }
+        .road-horizon {
+            position: absolute; bottom: 0; width: 100%; height: 55%;
+            background: linear-gradient(180deg, #222 0%, #0d0d14 100%);
+            clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
+            border-top: 2px solid rgba(255,255,255,0.2);
+        }
+        .walking-troop {
+            position: absolute; bottom: 120px; left: 50%;
+            transform: translateX(-50%);
+            display: flex; gap: 20px;
+            animation: walkIntoDistance 8s infinite linear;
+        }
+        @keyframes walkIntoDistance {
+            0% { transform: translateX(-50%) scale(1); bottom: 100px; opacity: 1; }
+            100% { transform: translateX(-50%) scale(0.2); bottom: 320px; opacity: 0.6; }
+        }
+        .back-walker {
+            font-size: 28px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            animation: stepBounce 0.6s infinite alternate ease-in-out;
+        }
+        @keyframes stepBounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-6px); }
+        }
     </style>
 </head>
 <body>
@@ -261,6 +308,7 @@
             <button class="hit-btn" data-lane="4">おにく</button>
         </div>
 
+        <!-- スタート画面 -->
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 15px;">
@@ -271,11 +319,34 @@
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
 
+        <!-- 結果画面 -->
         <div id="result-screen" class="overlay hidden">
             <h2 id="result-title" style="color:var(--secondary); font-size: 24px;">🎉 クリア！おめでとう！ 🎉</h2>
             <div id="res-score" style="font-size:20px; margin:10px 0; font-weight: bold;">SCORE: 0</div>
             <div id="res-detail" style="font-size:12px; color:#ccc; margin-bottom:15px; line-height:1.6;"></div>
-            <button class="btn-main" id="restart-btn">もう一度プレイ</button>
+            <p id="ending-countdown-msg" style="font-size: 11px; color: #aaa; margin-top: 10px;">5秒後にエンディングへ進みます...</p>
+            <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
+        </div>
+
+        <!-- 流星の路風エンディング画面 -->
+        <div id="ending-screen" class="overlay hidden">
+            <div class="shooting-star" style="top: 20%; left: 70%; animation-delay: 0s;"></div>
+            <div class="shooting-star" style="top: 40%; left: 80%; animation-delay: 2s;"></div>
+            <div class="road-horizon"></div>
+            
+            <div class="walking-troop">
+                <div class="back-walker">🦊</div>
+                <div class="back-walker">🦝</div>
+                <div class="back-walker">🍤</div>
+                <div class="back-walker">🥚</div>
+                <div class="back-walker">🥩</div>
+            </div>
+
+            <div style="position: absolute; bottom: 40px; z-index: 10; text-align: center; width: 100%;">
+                <h3 style="color: var(--secondary); font-size: 18px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Starlit Journey</h3>
+                <p style="font-size: 11px; color: #bbb; margin-bottom: 15px; text-shadow: 0 0 5px rgba(0,0,0,0.8);">果てなき空は いつも自由だ</p>
+                <button class="btn-main" id="ending-restart-btn" style="padding: 10px 25px; font-size: 15px;">タイトルへもどる</button>
+            </div>
         </div>
     </div>
 
@@ -289,7 +360,7 @@
         ];
         
         const START_DELAY = 10.0; 
-        const TOTAL_GAME_DURATION = 135.0; // 8秒カウント込みで2分15秒
+        const TOTAL_GAME_DURATION = 135.0;
         const MAX_MISS_ALLOWED = 20;
 
         let score = 0, combo = 0, missCount = 0;
@@ -297,9 +368,14 @@
         let gameActive = false, isCountingDown = false;
         let startTime = 0;
         let activeNotes = [], countdownTimer = null, animId = null;
+        let resultTimeout = null;
         
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
+
+        // エンディング用音源ファイル ending.mp3 を指定
+        const endingAudio = new Audio('ending.mp3'); 
+        endingAudio.volume = 0.8;
         
         const lanes = document.querySelectorAll('.lane');
 
@@ -344,43 +420,29 @@
             }
         }
 
-        // 正解のおかずが約80%の確率で出現するランダム譜面生成関数
         function generateRandomTimings() {
             let timings = [];
             let currentTime = 0.0;
-            
             while (currentTime < 125.0) {
-                const randomLane = Math.floor(Math.random() * 5); // 0〜4レーン
-                
+                const randomLane = Math.floor(Math.random() * 5);
                 let noteType;
-                const rand = Math.random();
-                if (rand < 0.80) {
-                    // 80%の確率でレーンと一致する正しいおかず（例：レーン0ならきつね）
+                if (Math.random() < 0.80) {
                     noteType = randomLane;
                 } else {
-                    // 残り20%の確率で別のランダムなおかず
                     let otherTypes = [0, 1, 2, 3, 4].filter(t => t !== randomLane);
                     noteType = otherTypes[Math.floor(Math.random() * otherTypes.length)];
                 }
-
-                timings.push({
-                    t: currentTime,
-                    lane: randomLane,
-                    type: noteType
-                });
-
-                // 0.9秒〜1.5秒おきに出現
+                timings.push({ t: currentTime, lane: randomLane, type: noteType });
                 currentTime += 0.9 + Math.random() * 0.6;
             }
             return timings;
         }
 
         function startGame() {
-            score = 0; 
-            combo = 0; 
-            missCount = 0;
-            perfectCount = 0;
-            goodCount = 0;
+            score = 0; combo = 0; missCount = 0;
+            perfectCount = 0; goodCount = 0;
+            if (resultTimeout) clearTimeout(resultTimeout);
+            endingAudio.pause(); // エンディング曲を停止
 
             document.getElementById('score').innerText = '0';
             document.getElementById('combo').innerText = '0';
@@ -388,25 +450,18 @@
 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('ending-screen').classList.add('hidden');
 
             document.querySelectorAll('.note').forEach(el => el.remove());
 
             const rawTimings = generateRandomTimings();
-
             activeNotes = rawTimings.map((item, index) => {
                 const targetTime = START_DELAY + item.t;
                 const el = document.createElement('div');
                 el.className = 'note';
                 el.innerText = INGREDIENTS[item.type].icon;
                 lanes[item.lane].appendChild(el);
-                return {
-                    id: index,
-                    el: el,
-                    removed: false,
-                    lane: item.lane,
-                    type: item.type,
-                    targetTime: targetTime
-                };
+                return { id: index, el: el, removed: false, lane: item.lane, type: item.type, targetTime: targetTime };
             });
 
             defaultAudio.currentTime = 0;
@@ -416,7 +471,6 @@
             cdEl.classList.remove('hidden');
             let timeLeft = 8;
             cdEl.innerText = timeLeft;
-
             isCountingDown = true; 
 
             if (countdownTimer) clearInterval(countdownTimer);
@@ -468,7 +522,6 @@
                     if (noteBottom > targetLinePixelFromTop + 60) {
                         obj.removed = true;
                         obj.el.remove();
-                        
                         if (obj.type === obj.lane) {
                             handleMiss();
                         }
@@ -494,7 +547,6 @@
             
             const playAreaHeight = lanes[0].clientHeight;
             const targetLinePixelFromTop = playAreaHeight - 130; 
-
             let hitFound = false;
 
             for (let obj of activeNotes) {
@@ -502,7 +554,6 @@
                     const noteTop = parseFloat(obj.el.style.top) || -50;
                     const noteCenter = noteTop + 22; 
                     const targetCenter = targetLinePixelFromTop + 3; 
-
                     const distance = noteCenter - targetCenter; 
                     const absDistance = Math.abs(distance);
 
@@ -582,6 +633,14 @@
 
             document.getElementById('res-score').innerText = 'SCORE: ' + score;
             document.getElementById('result-screen').classList.remove('hidden');
+
+            // 結果表示から5秒後に ending.mp3 と流星の路風エンディング画面へ自動遷移
+            resultTimeout = setTimeout(() => {
+                document.getElementById('result-screen').classList.add('hidden');
+                document.getElementById('ending-screen').classList.remove('hidden');
+                endingAudio.currentTime = 0;
+                endingAudio.play().catch(err => console.log(err));
+            }, 5000);
         }
 
         document.querySelectorAll('.hit-btn').forEach(btn => {
@@ -595,6 +654,11 @@
 
         document.getElementById('start-btn').addEventListener('click', startGame);
         document.getElementById('restart-btn').addEventListener('click', startGame);
+        document.getElementById('ending-restart-btn').addEventListener('click', () => {
+            endingAudio.pause();
+            document.getElementById('ending-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        });
     </script>
 </body>
 </html>
