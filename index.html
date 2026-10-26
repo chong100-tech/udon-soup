@@ -208,7 +208,7 @@
             background: linear-gradient(135deg, #ff9800, #f57c00);
             color: white; border: none; padding: 14px 35px;
             font-size: 18px; font-weight: bold; border-radius: 30px;
-            cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            cursor: pointer; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
         .btn-main:active { transform: scale(0.95); }
         .hidden { display: none !important; }
@@ -310,13 +310,15 @@
 
         <!-- スタート画面 -->
         <div id="start-screen" class="overlay">
-            <h2 style="color:var(--secondary); margin-bottom:10px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
-            <p style="font-size:12px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 15px;">
+            <h2 style="color:var(--secondary); margin-bottom:5px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
+            <p style="font-size:11px; color:#ccc; line-height:1.5; max-width: 320px; margin-bottom: 10px;">
                 レーンに一致する具材アイコンが高確率で登場！<br>
                 リズムに合わせて正しくタップしよう！<br>
                 <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
+            <!-- テスト用エンディング確認ボタン -->
+            <button class="btn-main" id="test-ending-btn" style="background: linear-gradient(135deg, #4caf50, #2e7d32); margin-top: 10px; font-size: 13px; padding: 10px 20px;">🎬 [テスト] エンディングを見る</button>
         </div>
 
         <!-- 結果画面 -->
@@ -373,7 +375,6 @@
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
 
-        // エンディング用音源ファイル ending.mp3 を指定
         const endingAudio = new Audio('ending.mp3'); 
         endingAudio.volume = 0.8;
         
@@ -438,11 +439,27 @@
             return timings;
         }
 
+        function triggerEnding() {
+            gameActive = false;
+            isCountingDown = false;
+            cancelAnimationFrame(animId);
+            if (countdownTimer) clearInterval(countdownTimer);
+            if (resultTimeout) clearTimeout(resultTimeout);
+            defaultAudio.pause();
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('ending-screen').classList.remove('hidden');
+            
+            endingAudio.currentTime = 0;
+            endingAudio.play().catch(err => console.log("Ending audio play error (404 check ending.mp3):", err));
+        }
+
         function startGame() {
             score = 0; combo = 0; missCount = 0;
             perfectCount = 0; goodCount = 0;
             if (resultTimeout) clearTimeout(resultTimeout);
-            endingAudio.pause(); // エンディング曲を停止
+            endingAudio.pause();
 
             document.getElementById('score').innerText = '0';
             document.getElementById('combo').innerText = '0';
@@ -634,12 +651,8 @@
             document.getElementById('res-score').innerText = 'SCORE: ' + score;
             document.getElementById('result-screen').classList.remove('hidden');
 
-            // 結果表示から5秒後に ending.mp3 と流星の路風エンディング画面へ自動遷移
             resultTimeout = setTimeout(() => {
-                document.getElementById('result-screen').classList.add('hidden');
-                document.getElementById('ending-screen').classList.remove('hidden');
-                endingAudio.currentTime = 0;
-                endingAudio.play().catch(err => console.log(err));
+                triggerEnding();
             }, 5000);
         }
 
@@ -654,6 +667,7 @@
 
         document.getElementById('start-btn').addEventListener('click', startGame);
         document.getElementById('restart-btn').addEventListener('click', startGame);
+        document.getElementById('test-ending-btn').addEventListener('click', triggerEnding);
         document.getElementById('ending-restart-btn').addEventListener('click', () => {
             endingAudio.pause();
             document.getElementById('ending-screen').classList.add('hidden');
