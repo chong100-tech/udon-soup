@@ -168,7 +168,7 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 夕焼け＆右カーブ砂道エンディング演出 --- */
+        /* --- 夕焼け＆正しい右カーブ砂道エンディング演出 --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
@@ -207,7 +207,7 @@
             background: #388e3c; overflow: hidden;
         }
 
-        /* 手前中央始まり・奥が右に曲がる「右カーブ」砂道とアニメーション点線 */
+        /* 手前幅広＆奥が右へ曲がる「右カーブ」砂道とアニメーション点線 */
         .road-svg {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
         }
@@ -220,14 +220,14 @@
             100% { stroke-dashoffset: -24; }
         }
 
-        /* 手前中央に完璧に整列するおかずたち */
+        /* 広めの道にぴったり収まる、少しコンパクトなおかずたち */
         .walking-troop {
-            position: absolute; bottom: 110px; left: 50%;
-            transform: translateX(-50%); display: flex; gap: 6px;
+            position: absolute; bottom: 105px; left: 50%;
+            transform: translateX(-50%); display: flex; gap: 4px;
             z-index: 10; align-items: center; justify-content: center;
         }
         .troop-item {
-            font-size: 30px; width: 38px; height: 38px;
+            font-size: 26px; width: 34px; height: 34px;
             display: flex; align-items: center; justify-content: center;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
         }
@@ -305,20 +305,20 @@
             <div class="white-cloud" style="top: 22%; width: 120px; height: 32px; animation-delay: 6s;"></div>
             <div class="white-cloud" style="top: 15%; width: 85px; height: 24px; animation-delay: 11s;"></div>
 
-            <!-- 草原と手前中央スタートの右カーブ砂道 -->
+            <!-- 草原と手前広め・奥が右カーブの砂道 -->
             <div class="field-bg">
                 <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
-                    <!-- 奥に向かって右へ曲がっていく砂道 -->
-                    <path d="M 180 0 Q 380 150 370 300 L 110 300 Q 280 150 120 0 Z" fill="#d49a55" />
-                    <!-- 両サイドの動く白点線 -->
-                    <path class="road-line" d="M 178 0 Q 375 150 365 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
-                    <path class="road-line" d="M 122 0 Q 282 150 115 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
+                    <!-- 道のベース（手前が広く、奥へ行くほど右へ曲がる） -->
+                    <path d="M 200 0 Q 150 150 380 300 L 100 300 Q 110 150 160 0 Z" fill="#d49a55" />
+                    <!-- 両サイドの動く白点線車線 -->
+                    <path class="road-line" d="M 163 0 Q 113 150 108 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
+                    <path class="road-line" d="M 197 0 Q 147 150 372 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
                 </svg>
             </div>
 
-            <!-- 道の中を進むおかずたち（きつねは後ろ姿） -->
+            <!-- 道幅にすっぽり収まるおかずたち -->
             <div class="walking-troop">
-                <div class="troop-item">🦊</div> <!-- 後ろ姿イメージのきつね -->
+                <div class="troop-item">🦊</div>
                 <div class="troop-item">🦝</div>
                 <div class="troop-item">🍤</div>
                 <div class="troop-item">🥚</div>
@@ -349,24 +349,22 @@
         
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
+        defaultAudio.loop = true;
 
         const endingAudio = new Audio('ending.mp3'); 
         endingAudio.volume = 0.8;
+        endingAudio.loop = true;
         
         const lanes = document.querySelectorAll('.lane');
 
-        // 音声アンロック処理
+        // ★音声ブロックを確実に回避する最強のアンロック処理★
         function unlockAllAudio() {
-            defaultAudio.play().then(() => {
-                defaultAudio.pause();
-                defaultAudio.currentTime = 0;
-            }).catch(() => {});
-
-            endingAudio.play().then(() => {
-                endingAudio.pause();
-                endingAudio.currentTime = 0;
-            }).catch(() => {});
-
+            [defaultAudio, endingAudio].forEach(audio => {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+            });
             document.removeEventListener('click', unlockAllAudio);
             document.removeEventListener('touchstart', unlockAllAudio);
         }
@@ -446,12 +444,12 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
             
-            // ending.mp3 の再生
+            // ending.mp3 の確実な再生処理
             endingAudio.currentTime = 0;
             const playPromise = endingAudio.play();
             if (playPromise !== undefined) {
                 playPromise.catch(err => {
-                    console.log("ending.mp3再生失敗:", err);
+                    console.log("ending.mp3再生ブロック:", err);
                 });
             }
         }
