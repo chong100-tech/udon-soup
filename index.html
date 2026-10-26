@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>うどんかぞえうたリズムゲーム</title>
     <style>
         :root {
@@ -15,34 +15,30 @@
         html, body {
             width: 100%;
             height: 100%;
-            overflow-x: hidden;
-            overflow-y: auto;
+            overflow: hidden;
             background-color: var(--bg-color);
             color: #fff;
             font-family: 'Helvetica Neue', Arial, sans-serif;
+            touch-action: none;
         }
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding: 10px 0;
-            touch-action: manipulation;
+            justify-content: center;
         }
 
         #game-container {
             position: relative;
             width: 100%;
             max-width: 480px;
-            height: 820px;
-            background: #0b0c10;
+            height: 100%;
+            max-height: 850px;
+            background: linear-gradient(135deg, #2c3e50, #111);
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 4px solid #333;
-            border-radius: 12px;
-            margin: auto;
         }
 
         .header {
@@ -50,7 +46,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 12px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.6);
             z-index: 10;
             border-bottom: 2px solid rgba(255,255,255,0.1);
         }
@@ -59,64 +55,28 @@
         .value { font-size: 17px; font-weight: bold; color: var(--secondary); }
         .miss-value { font-size: 17px; font-weight: bold; color: #f44336; }
 
-        /* --- ゲームプレイ時のステージ背景 --- */
         .stage-container {
             position: relative;
-            height: 200px;
-            background: #111827;
+            height: 190px;
+            background: radial-gradient(circle, #3a4454 0%, #111823 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-end;
-            padding-bottom: 10px;
+            justify-content: space-between;
+            padding: 10px 0;
             border-bottom: 3px dashed rgba(255,255,255,0.2);
             overflow: hidden;
         }
 
-        .sky-bg {
-            position: absolute;
-            top: 0; left: 0;
-            width: 200%; height: 60%;
-            background: radial-gradient(circle at 50% 30%, #3a4454 0%, #111823 80%),
-                        repeating-linear-gradient(90deg, transparent 0, transparent 40px, rgba(255,255,255,0.05) 40px, rgba(255,255,255,0.05) 80px);
-            animation: scrollSky 15s linear infinite;
-            z-index: 1;
-        }
-        @keyframes scrollSky {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        .scrolling-ground {
-            position: absolute;
-            bottom: -50px; left: -50%;
-            width: 200%; height: 140px;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(255, 193, 7, 0.25) 0px,
-                rgba(255, 193, 7, 0.25) 4px,
-                transparent 4px,
-                transparent 24px
-            );
-            transform: rotateX(60deg);
-            transform-origin: top center;
-            animation: scrollGround 0.8s linear infinite;
-            z-index: 2;
-        }
-        @keyframes scrollGround {
-            0% { background-position-y: 0px; }
-            100% { background-position-y: 24px; }
-        }
-
         .spotlight {
             position: absolute;
-            top: -40%; left: 50%;
+            top: -50%; left: 50%;
             width: 200%; height: 200%;
-            background: conic-gradient(from 0deg at 50% 50%, rgba(255,193,7,0.12) 0deg, transparent 30deg, rgba(255,193,7,0.12) 60deg, transparent 90deg);
+            background: conic-gradient(from 0deg at 50% 50%, rgba(255,193,7,0.15) 0deg, transparent 30deg, rgba(255,193,7,0.15) 60deg, transparent 90deg, rgba(255,193,7,0.15) 120deg, transparent 150deg);
             transform: translate(-50%, 0);
             animation: rotateLight 12s linear infinite;
             pointer-events: none;
-            z-index: 3;
+            z-index: 1;
         }
         @keyframes rotateLight {
             0% { transform: translate(-50%, 0) rotate(0deg); }
@@ -124,17 +84,15 @@
         }
 
         .bowl {
-            position: absolute;
-            top: 10px;
-            width: 110px; height: 36px;
+            width: 120px; height: 40px;
             background: #e0e0e0;
-            border-bottom-left-radius: 55px; border-bottom-right-radius: 55px;
+            border-bottom-left-radius: 60px; border-bottom-right-radius: 60px;
             border: 3px solid #b0b0b0;
             display: flex; align-items: center; justify-content: center;
             z-index: 5;
             box-shadow: 0 4px 10px rgba(0,0,0,0.6);
         }
-        .bowl-text { font-size: 11px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
+        .bowl-text { font-size: 12px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
 
         .dancers-stage {
             position: relative;
@@ -142,35 +100,51 @@
             display: flex;
             justify-content: space-around;
             align-items: flex-end;
-            padding: 0 5px;
-            z-index: 5;
-            height: 95px;
+            padding: 0 10px;
+            z-index: 4;
+            height: 90px;
         }
         .dancer-card {
             display: flex;
             flex-direction: column;
             align-items: center;
+            transform-origin: bottom center;
         }
         .dancer-icon {
-            font-size: 32px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .dancer-label {
+            font-size: 9px;
+            font-weight: bold;
+            margin-top: 3px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: var(--secondary);
         }
 
-        @keyframes danceStep {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.1); }
+        @keyframes danceLeftRight {
+            0% { transform: translateY(0) rotate(-12deg) scale(0.95); }
+            50% { transform: translateY(-12px) rotate(0deg) scale(1.1); }
+            100% { transform: translateY(0) rotate(12deg) scale(0.95); }
         }
 
-        .dancing .dancer-card:nth-child(1) { animation: danceStep 0.4s infinite ease-in-out; }
-        .dancing .dancer-card:nth-child(2) { animation: danceStep 0.4s 0.08s infinite ease-in-out; }
-        .dancing .dancer-card:nth-child(3) { animation: danceStep 0.4s 0.16s infinite ease-in-out; }
-        .dancing .dancer-card:nth-child(4) { animation: danceStep 0.4s 0.24s infinite ease-in-out; }
-        .dancing .dancer-card:nth-child(5) { animation: danceStep 0.4s 0.32s infinite ease-in-out; }
+        .dancing .dancer-card:nth-child(1) { animation: danceLeftRight 0.4s infinite alternate ease-in-out; }
+        .dancing .dancer-card:nth-child(2) { animation: danceLeftRight 0.4s 0.08s infinite alternate ease-in-out; }
+        .dancing .dancer-card:nth-child(3) { animation: danceLeftRight 0.4s 0.16s infinite alternate ease-in-out; }
+        .dancing .dancer-card:nth-child(4) { animation: danceLeftRight 0.4s 0.24s infinite alternate ease-in-out; }
+        .dancing .dancer-card:nth-child(5) { animation: danceLeftRight 0.4s 0.32s infinite alternate ease-in-out; }
 
         .play-area {
             position: relative; flex: 1;
             display: flex; justify-content: space-between;
-            padding: 0 5px; background: rgba(0,0,0,0.4); overflow: hidden;
+            padding: 0 5px; background: rgba(0,0,0,0.3); overflow: hidden;
         }
         .lane {
             position: relative; width: 19%; height: 100%;
@@ -231,7 +205,6 @@
             color: white; border: none; padding: 14px 35px;
             font-size: 18px; font-weight: bold; border-radius: 30px;
             cursor: pointer; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            transition: transform 0.1s, background 0.2s;
         }
         .btn-main:active { transform: scale(0.95); }
         .hidden { display: none !important; }
@@ -242,167 +215,105 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 🌅 カービィ風エンディング画面 (#ending-screen) モバイル対応完全版 --- */
+        /* --- 旅立ちの夕焼けエンディング専用スタイル（右カービー風＋夕焼け雲） --- */
         #ending-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
+            background: linear-gradient(180deg, #1a0826 0%, #4a1525 40%, #d96b27 70%, #f7c56d 100%);
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
+            position: relative;
         }
-
-        /* 夕やけ空背景 */
-        .sunset-sky {
+        /* 流れる夕焼け雲 */
+        .sunset-cloud {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 55%;
-            background: linear-gradient(180deg, #2b1055 0%, #611e56 35%, #a83e38 70%, #f39c12 100%);
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .sunset-sun {
-            position: absolute;
-            top: 22%; left: 50%; transform: translate(-50%, 0);
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #fff7d1 0%, #ffab00 60%, rgba(255,140,0,0) 100%);
-            box-shadow: 0 0 40px #ff6f00;
-            opacity: 0.9;
-        }
-
-        .clouds-layer {
-            position: absolute;
-            top: 0; left: 0; width: 200%; height: 100%;
-            background: repeating-linear-gradient(
-                90deg,
-                transparent 0px,
-                transparent 100px,
-                rgba(255, 140, 100, 0.12) 160px,
-                rgba(60, 20, 50, 0.15) 240px,
-                transparent 300px
-            );
-            animation: scrollCloudsHorizon 25s linear infinite;
-        }
-        @keyframes scrollCloudsHorizon {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        /* 📱 スマホでも完全に描画される 2D-SVG 遠近流動キャンバス */
-        .mobile-road-wrapper {
-            position: absolute;
-            bottom: 0; left: 0;
-            width: 100%; height: 50%;
-            z-index: 2;
-            overflow: hidden;
-        }
-
-        .svg-road-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* 砂道模様が奥から手前へ無限に流れるアニメーション */
-        .flowing-sand-pattern {
-            animation: moveRoadDown 0.6s linear infinite;
-        }
-        @keyframes moveRoadDown {
-            0% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: -40; }
-        }
-
-        /* 🧍 おかずキャラクターたち（円枠なし・名前表示なし・跳ねない・手前で砂道内に配置） */
-        .ending-walkers-container {
-            position: absolute;
-            bottom: 65px; left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            z-index: 10;
-            width: 220px; /* 砂道の幅の中にピッタリ収める */
-        }
-
-        .walker-character {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .walker-avatar {
-            font-size: 32px;
-            filter: drop-shadow(0 6px 6px rgba(0,0,0,0.6));
-        }
-
-        /* UIオーバーレイ */
-        .ending-ui-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 25px 15px 20px 15px;
-            z-index: 20;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 50px;
+            filter: blur(8px);
+            animation: moveCloud 12s infinite linear;
             pointer-events: none;
         }
-
-        .ending-title-box {
-            text-align: center;
+        @keyframes moveCloud {
+            0% { transform: translateX(-150px); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateX(550px); opacity: 0; }
         }
 
-        .ending-title {
-            font-size: 22px; font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 12px #ff6f00, 0 3px 6px rgba(0,0,0,0.9);
-            letter-spacing: 2px;
+        /* 夕方の草原と緩やかな右カーブの砂道 */
+        .sunset-road-container {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 60%;
+            overflow: hidden;
+            background: #2e6f40; /* 草原カラー */
         }
-        .ending-subtitle {
-            font-size: 12px; color: #ffe0b2;
-            margin-top: 4px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        .curved-dirt-road {
+            position: absolute;
+            bottom: 0;
+            /* 緩やかな右カーブを描く道（ポリゴン＋スロート） */
+            left: 20%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(180deg, #c28e4e 0%, #e8b974 100%);
+            clip-path: polygon(42% 0%, 58% 0%, 95% 100%, 5% 100%);
+            transform-origin: bottom center;
+            animation: roadFlow 4s infinite linear;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
+        @keyframes roadFlow {
+            0% { transform: scaleY(0.95) skewX(0deg); }
+            50% { transform: scaleY(1.05) skewX(3deg); }
+            100% { transform: scaleY(0.95) skewX(0deg); }
         }
 
-        .ending-controls {
-            pointer-events: auto;
-            text-align: center;
-            margin-bottom: 5px;
+        /* 道幅にぴったり収まるキャラクター隊列 */
+        .walking-troop {
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+            align-items: center;
+            justify-content: center;
+            animation: walkBounce 0.8s infinite alternate ease-in-out;
+        }
+        @keyframes walkBounce {
+            0% { transform: translateX(-50%) translateY(0) scale(1); }
+            100% { transform: translateX(-50%) translateY(-8px) scale(1.03); }
+        }
+        .troop-member {
+            font-size: 30px;
+            width: 48px; height: 48px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            border: 2px solid #ff9800;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <!-- ヘッダー -->
         <div class="header">
             <div class="score-box"><div class="label">SCORE</div><div id="score" class="value">0</div></div>
             <div class="combo-box"><div class="label">COMBO</div><div id="combo" class="value">0</div></div>
             <div class="miss-box"><div class="label">MISS残数</div><div id="miss-left" class="miss-value">20</div></div>
         </div>
 
-        <!-- プレイ時のステージ背景 -->
         <div class="stage-container">
-            <div class="sky-bg"></div>
-            <div class="scrolling-ground"></div>
             <div class="spotlight"></div>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
             
             <div class="dancers-stage dancing">
-                <div class="dancer-card"><div class="dancer-icon">🦊</div></div>
-                <div class="dancer-card"><div class="dancer-icon">🦝</div></div>
-                <div class="dancer-card"><div class="dancer-icon">🍤</div></div>
-                <div class="dancer-card"><div class="dancer-icon">🥚</div></div>
-                <div class="dancer-card"><div class="dancer-icon">🥩</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🦊</div><div class="dancer-label">きつね</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🦝</div><div class="dancer-label">たぬき</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🍤</div><div class="dancer-label">てんぷら</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🥚</div><div class="dancer-label">つきみ</div></div>
+                <div class="dancer-card"><div class="dancer-icon">🥩</div><div class="dancer-label">おにく</div></div>
             </div>
         </div>
 
         <div id="countdown-overlay" class="hidden">8</div>
 
-        <!-- プレイエリア -->
         <div class="play-area">
             <div class="lane" data-lane="0"><div class="lane-title">きつね</div></div>
             <div class="lane" data-lane="1"><div class="lane-title">たぬき</div></div>
@@ -413,7 +324,6 @@
             <div id="feedback">PERFECT!</div>
         </div>
 
-        <!-- 操作ボタン -->
         <div class="control-panel">
             <button class="hit-btn" data-lane="0">きつね</button>
             <button class="hit-btn" data-lane="1">たぬき</button>
@@ -426,7 +336,6 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:5px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:11px; color:#ccc; line-height:1.5; max-width: 320px; margin-bottom: 10px;">
-                レーンに一致する具材アイコンが高確率で登場！<br>
                 リズムに合わせて正しくタップしよう！<br>
                 <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
@@ -443,52 +352,31 @@
             <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
-        <!-- 🌅 モバイル・PC両対応 エンディング画面 -->
-        <div id="ending-screen" class="hidden">
-            <!-- 夕やけ空 -->
-            <div class="sunset-sky">
-                <div class="sunset-sun"></div>
-                <div class="clouds-layer"></div>
+        <!-- 夕焼けエンディング画面（右カービー風＋夕焼け雲＋道内キャラ） -->
+        <div id="ending-screen" class="overlay hidden">
+            <!-- 夕焼け雲 -->
+            <div class="sunset-cloud" style="top: 15%; width: 120px; height: 35px; animation-delay: 0s;"></div>
+            <div class="sunset-cloud" style="top: 30%; width: 180px; height: 45px; animation-delay: 4s;"></div>
+            <div class="sunset-cloud" style="top: 22%; width: 100px; height: 30px; animation-delay: 8s;"></div>
+
+            <!-- 草原と緩やかな右カーブの砂道 -->
+            <div class="sunset-road-container">
+                <div class="curved-dirt-road"></div>
             </div>
 
-            <!-- スマホ対応 遠近SVGグラフィック（草原と流れるカーブ砂道） -->
-            <div class="mobile-road-wrapper">
-                <svg class="svg-road-canvas" viewBox="0 0 400 300" preserveAspectRatio="none">
-                    <!-- 草原ベース -->
-                    <rect x="0" y="0" width="400" height="300" fill="#32632b" />
-                    <rect x="0" y="0" width="400" height="30" fill="#a83e38" opacity="0.5" />
-
-                    <!-- 緩やかなカーブを描く砂道 (パースペクティブ) -->
-                    <!-- 奥: x=170~230 (幅60), 手前: x=70~330 (幅260) -->
-                    <path d="M 170 0 Q 230 120, 70 300 L 330 300 Q 260 120, 230 0 Z" fill="#d4a359" />
-                    <!-- 砂道の両端の影 -->
-                    <path d="M 170 0 Q 230 120, 70 300 L 90 300 Q 240 120, 185 0 Z" fill="#b07d38" opacity="0.6" />
-                    <path d="M 215 0 Q 240 120, 310 300 L 330 300 Q 260 120, 230 0 Z" fill="#b07d38" opacity="0.6" />
-
-                    <!-- 向かってくるアニメーションライン（流れを感じさせる砂道模様） -->
-                    <path class="flowing-sand-pattern" d="M 200 0 Q 245 120, 200 300" stroke="#f2ca85" stroke-width="12" stroke-dasharray="20,20" fill="none" opacity="0.7" />
-                </svg>
+            <!-- 道幅に完璧に収まるキャラクター隊列 -->
+            <div class="walking-troop">
+                <div class="troop-member">🦊</div>
+                <div class="troop-member">🦝</div>
+                <div class="troop-member">🍤</div>
+                <div class="troop-member">🥚</div>
+                <div class="troop-member">🥩</div>
             </div>
 
-            <!-- 砂道の中に収まるおかずたち（丸枠なし・名前なし・静止で整列） -->
-            <div class="ending-walkers-container">
-                <div class="walker-character"><div class="walker-avatar">🦊</div></div>
-                <div class="walker-character"><div class="walker-avatar">🦝</div></div>
-                <div class="walker-character"><div class="walker-avatar">🍤</div></div>
-                <div class="walker-character"><div class="walker-avatar">🥚</div></div>
-                <div class="walker-character"><div class="walker-avatar">🥩</div></div>
-            </div>
-
-            <!-- UI表示 -->
-            <div class="ending-ui-overlay">
-                <div class="ending-title-box">
-                    <div class="ending-title">〜 旅立ちの夕空 〜</div>
-                    <div class="ending-subtitle">みんなで歩む 明日への道</div>
-                </div>
-
-                <div class="ending-controls">
-                    <button class="btn-main" id="ending-restart-btn" style="padding: 10px 28px; font-size: 15px;">タイトルへもどる</button>
-                </div>
+            <div style="position: absolute; bottom: 35px; z-index: 20; text-align: center; width: 100%;">
+                <h3 style="color: var(--secondary); font-size: 18px; margin-bottom: 5px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);">Starlit Journey</h3>
+                <p style="font-size: 11px; color: #fff; margin-bottom: 12px; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">うどんの旅はまだまだ続く！</p>
+                <button class="btn-main" id="ending-restart-btn" style="padding: 10px 25px; font-size: 15px;">タイトルへもどる</button>
             </div>
         </div>
     </div>
@@ -513,43 +401,31 @@
         let activeNotes = [], countdownTimer = null, animId = null;
         let resultTimeout = null;
         
-        // 音楽オブジェクトの設定
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
+        defaultAudio.loop = true;
 
         const endingAudio = new Audio('ending.mp3'); 
         endingAudio.volume = 0.8;
-        endingAudio.loop = true; // ループ再生
+        endingAudio.loop = true;
         
         const lanes = document.querySelectorAll('.lane');
+
+        // 音声アンロック用：画面のどこかを最初に触った時に自動でAudioContextを有効化
+        document.body.addEventListener('pointerdown', () => {
+            if (defaultAudio.paused && !gameActive && document.getElementById('start-screen').classList.contains('hidden') === false) {
+                // サイレント再生などでブロックを解除する試行
+            }
+        }, { once: true });
+
         let audioCtx = null;
-
-        // 📱 スマホブラウザの音声自動再生ブロックを解除するためのワンタイム処理
-        function unlockMobileAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            // 無音のダミー再生を行ってHTML5 Audioのアンロックを確定させる
-            endingAudio.play().then(() => {
-                endingAudio.pause();
-                endingAudio.currentTime = 0;
-            }).catch(() => {});
-
-            // 一度アンロックしたらイベント解除
-            window.removeEventListener('touchstart', unlockMobileAudio);
-            window.removeEventListener('click', unlockMobileAudio);
-        }
-
-        window.addEventListener('touchstart', unlockMobileAudio, { once: true });
-        window.addEventListener('click', unlockMobileAudio, { once: true });
-
         function playSound(type) {
             try {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
                 }
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -571,7 +447,7 @@
                     gain.gain.setValueAtTime(0.65, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
                     osc.start(now);
-                    osc.stop(now + 0.25);
+                    osc.stop(now + 0.2);
                 } else {
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(110, now);
@@ -604,26 +480,24 @@
             return timings;
         }
 
-        // --- エンディング画面起動処理（自動再生） ---
         function triggerEnding() {
             gameActive = false;
             isCountingDown = false;
             cancelAnimationFrame(animId);
             if (countdownTimer) clearInterval(countdownTimer);
             if (resultTimeout) clearTimeout(resultTimeout);
-            
-            // BGM停止
             defaultAudio.pause();
-            defaultAudio.currentTime = 0;
 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
-
-            // 🎵 ボタンを押さずに自動再生
+            
+            // ending.mp3を強制再生（自動）
             endingAudio.currentTime = 0;
-            endingAudio.play().catch(err => {
-                console.log("ending.mp3 autoplay log:", err);
+            endingAudio.play().then(() => {
+                console.log("ending.mp3 played successfully!");
+            }).catch(err => {
+                console.log("Auto-play blocked or ending.mp3 missing:", err);
             });
         }
 
@@ -631,9 +505,7 @@
             score = 0; combo = 0; missCount = 0;
             perfectCount = 0; goodCount = 0;
             if (resultTimeout) clearTimeout(resultTimeout);
-            
             endingAudio.pause();
-            endingAudio.currentTime = 0;
 
             document.getElementById('score').innerText = '0';
             document.getElementById('combo').innerText = '0';
@@ -656,7 +528,7 @@
             });
 
             defaultAudio.currentTime = 0;
-            defaultAudio.play().catch(err => console.log("udon.mp3 play error:", err));
+            defaultAudio.play().catch(err => console.log("defaultAudio play error:", err));
 
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
@@ -830,7 +702,6 @@
             }, 5000);
         }
 
-        // イベントリスナー
         document.querySelectorAll('.hit-btn').forEach(btn => {
             const lane = parseInt(btn.getAttribute('data-lane'));
             btn.addEventListener('click', () => judgeLane(lane));
@@ -843,10 +714,8 @@
         document.getElementById('start-btn').addEventListener('click', startGame);
         document.getElementById('restart-btn').addEventListener('click', startGame);
         document.getElementById('test-ending-btn').addEventListener('click', triggerEnding);
-        
         document.getElementById('ending-restart-btn').addEventListener('click', () => {
             endingAudio.pause();
-            endingAudio.currentTime = 0;
             document.getElementById('ending-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
         });
