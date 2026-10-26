@@ -168,7 +168,7 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 夕焼け＆正確な右カーブ砂道・うしろ向きキツネのエンディング --- */
+        /* --- 夕焼け＆右カーブ砂道・うしろ向きキツネのエンディング --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
@@ -216,7 +216,6 @@
             100% { stroke-dashoffset: -24; }
         }
 
-        /* 道路の中央に完璧にセンター合わせした「うしろ向きキツネ（静止画）」 */
         .walking-troop {
             position: absolute; bottom: 105px; left: 50%;
             transform: translateX(-50%); z-index: 10;
@@ -226,7 +225,6 @@
             font-size: 38px; width: 48px; height: 48px;
             display: flex; align-items: center; justify-content: center;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
-            /* 背中を向けて奥を向いているように横向きの絵文字をフリップ＆微調整 */
             transform: scaleX(-1);
         }
     </style>
@@ -281,7 +279,8 @@
                 <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
-            
+        </div>
+
         <!-- 結果画面 -->
         <div id="result-screen" class="overlay hidden">
             <h2 id="result-title" style="color:var(--secondary); font-size: 24px;">🎉 クリア！おめでとう！ 🎉</h2>
@@ -299,17 +298,14 @@
             <div class="white-cloud" style="top: 22%; width: 120px; height: 32px; animation-delay: 6s;"></div>
             <div class="white-cloud" style="top: 15%; width: 85px; height: 24px; animation-delay: 11s;"></div>
 
-            <!-- 草原と「右カーブ」砂道（キツネの配置軸と完全に一致させたパス） -->
             <div class="field-bg">
                 <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
-                    <!-- 道の始まりのセンターを完全に中央に調整した右カーブ -->
                     <path d="M 190 0 Q 150 150 380 300 L 110 300 Q 120 150 150 0 Z" fill="#d49a55" />
                     <path class="road-line" d="M 170 0 Q 135 150 115 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
                     <path class="road-line" d="M 180 0 Q 142 150 375 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
                 </svg>
             </div>
 
-            <!-- 道の中央にぴったり配置したうしろ向きのキツネ（静止画） -->
             <div class="walking-troop">
                 <div class="fox-back">🦊</div>
             </div>
@@ -338,21 +334,24 @@
         
         const defaultAudio = new Audio('udon.mp3');
         defaultAudio.volume = 0.9;
-        defaultAudio.loop = true;
 
         const endingAudio = new Audio('ending.mp3'); 
         endingAudio.volume = 0.8;
-        endingAudio.loop = true;
         
         const lanes = document.querySelectorAll('.lane');
 
+        // 音声ブロックを確実に解除するアンロック処理
         function unlockAllAudio() {
-            [defaultAudio, endingAudio].forEach(audio => {
-                audio.play().then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                }).catch(() => {});
-            });
+            defaultAudio.play().then(() => {
+                defaultAudio.pause();
+                defaultAudio.currentTime = 0;
+            }).catch(() => {});
+
+            endingAudio.play().then(() => {
+                endingAudio.pause();
+                endingAudio.currentTime = 0;
+            }).catch(() => {});
+
             document.removeEventListener('click', unlockAllAudio);
             document.removeEventListener('touchstart', unlockAllAudio);
         }
@@ -433,12 +432,9 @@
             document.getElementById('ending-screen').classList.remove('hidden');
             
             endingAudio.currentTime = 0;
-            const playPromise = endingAudio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(err => {
-                    console.log("ending.mp3再生ブロック:", err);
-                });
-            }
+            endingAudio.play().catch(err => {
+                console.log("ending.mp3再生エラー:", err);
+            });
         }
 
         function startGame() {
@@ -469,8 +465,11 @@
                 return { id: index, el: el, removed: false, lane: item.lane, type: item.type, targetTime: targetTime };
             });
 
+            // udon.mp3 の確実な再生
             defaultAudio.currentTime = 0;
-            defaultAudio.play().catch(err => console.log(err));
+            defaultAudio.play().catch(err => {
+                console.log("udon.mp3再生エラー:", err);
+            });
 
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
@@ -656,10 +655,6 @@
         document.getElementById('start-btn').addEventListener('click', () => {
             unlockAllAudio();
             startGame();
-        });
-        document.getElementById('test-ending-btn').addEventListener('click', () => {
-            unlockAllAudio();
-            triggerEnding();
         });
         document.getElementById('restart-btn').addEventListener('click', () => {
             unlockAllAudio();
