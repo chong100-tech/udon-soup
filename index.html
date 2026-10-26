@@ -220,14 +220,15 @@
             100% { stroke-dashoffset: -24; }
         }
 
-        /* 道幅に収まるおかずたち（アイコンのみ） */
+        /* ★おかずたちの配置幅調整（おにくもぴったり道内に収まるように間隔調整）★ */
         .walking-troop {
             position: absolute; bottom: 110px; left: 50%;
-            transform: translateX(-50%); display: flex; gap: 8px;
+            transform: translateX(-50%); display: flex; gap: 4px;
             z-index: 10; align-items: center; justify-content: center;
+            width: 85%;
         }
         .troop-item {
-            font-size: 32px; width: 42px; height: 42px;
+            font-size: 30px; width: 38px; height: 38px;
             display: flex; align-items: center; justify-content: center;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
         }
@@ -313,9 +314,7 @@
             <!-- 草原と右カーブ砂道（点線の動き付き） -->
             <div class="field-bg">
                 <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
-                    <!-- 緩やかな右カーブの砂道 -->
                     <path d="M 100 0 Q 300 100 440 300 L -40 300 Q 150 100 50 0 Z" fill="#d49a55" />
-                    <!-- 動く両サイドの点線車線 -->
                     <path class="road-line" d="M 98 0 Q 295 100 435 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
                     <path class="road-line" d="M 52 0 Q 155 100 -35 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.8" />
                 </svg>
@@ -366,15 +365,24 @@
         
         const lanes = document.querySelectorAll('.lane');
 
-        // タップ時の自動権限アンロック
-        function unlockAudioPermission() {
-            defaultAudio.load();
-            endingAudio.load();
-            document.removeEventListener('click', unlockAudioPermission);
-            document.removeEventListener('touchstart', unlockAudioPermission);
+        // ★最強の音声アンロック処理★
+        // ユーザーが画面を一度タップした際に ending.mp3 を一瞬鳴らしてブラウザ制限を完全に突破する
+        function unlockAllAudio() {
+            defaultAudio.play().then(() => {
+                defaultAudio.pause();
+                defaultAudio.currentTime = 0;
+            }).catch(() => {});
+
+            endingAudio.play().then(() => {
+                endingAudio.pause();
+                endingAudio.currentTime = 0;
+            }).catch(() => {});
+
+            document.removeEventListener('click', unlockAllAudio);
+            document.removeEventListener('touchstart', unlockAllAudio);
         }
-        document.addEventListener('click', unlockAudioPermission);
-        document.addEventListener('touchstart', unlockAudioPermission);
+        document.addEventListener('click', unlockAllAudio);
+        document.addEventListener('touchstart', unlockAllAudio);
 
         let audioCtx = null;
         function playSound(type) {
@@ -449,11 +457,14 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
             
-            // ending.mp3 を再生
+            // ending.mp3 の自動再生
             endingAudio.currentTime = 0;
-            endingAudio.play().catch(err => {
-                console.log("ending.mp3再生エラー:", err);
-            });
+            const playPromise = endingAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    console.log("ending.mp3再生失敗:", err);
+                });
+            }
         }
 
         function startGame() {
@@ -668,9 +679,19 @@
             });
         });
 
-        document.getElementById('start-btn').addEventListener('click', startGame);
-        document.getElementById('restart-btn').addEventListener('click', startGame);
-        document.getElementById('test-ending-btn').addEventListener('click', triggerEnding);
+        // ボタン押し時にも確実に無音再生を通してアンロックを確定させる
+        document.getElementById('start-btn').addEventListener('click', () => {
+            unlockAllAudio();
+            startGame();
+        });
+        document.getElementById('test-ending-btn').addEventListener('click', () => {
+            unlockAllAudio();
+            triggerEnding();
+        });
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            unlockAllAudio();
+            startGame();
+        });
         document.getElementById('ending-restart-btn').addEventListener('click', () => {
             endingAudio.pause();
             endingAudio.currentTime = 0;
