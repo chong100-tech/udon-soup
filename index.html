@@ -168,7 +168,7 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 夕焼け＆正しい右カーブ砂道エンディング演出 --- */
+        /* --- 夕焼け＆右カーブ砂道・きつね後ろ姿エンディング演出 --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
@@ -176,14 +176,12 @@
             display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
         }
 
-        /* 大きな夕日（太陽） */
         .sun {
             position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
             width: 120px; height: 120px; background: radial-gradient(circle, #fff 40%, #ffe082 70%, rgba(255,255,255,0) 100%);
             border-radius: 50%; box-shadow: 0 0 40px #ffb300; pointer-events: none;
         }
 
-        /* 白い雲 */
         .white-cloud {
             position: absolute; background: #ffffff;
             border-radius: 30px; opacity: 0.9;
@@ -201,13 +199,11 @@
             100% { transform: translateX(520px); }
         }
 
-        /* 地面（草原） */
         .field-bg {
             position: absolute; bottom: 0; width: 100%; height: 58%;
             background: #388e3c; overflow: hidden;
         }
 
-        /* 手前幅広＆奥が右へ曲がる「右カーブ」砂道とアニメーション点線 */
         .road-svg {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
         }
@@ -220,16 +216,21 @@
             100% { stroke-dashoffset: -24; }
         }
 
-        /* 広めの道にぴったり収まる、少しコンパクトなおかずたち */
+        /* 道路の中央に配置した「後ろ姿のきつね」 */
         .walking-troop {
             position: absolute; bottom: 105px; left: 50%;
-            transform: translateX(-50%); display: flex; gap: 4px;
-            z-index: 10; align-items: center; justify-content: center;
+            transform: translateX(-50%); z-index: 10;
+            display: flex; align-items: center; justify-content: center;
         }
-        .troop-item {
-            font-size: 26px; width: 34px; height: 34px;
+        .fox-back {
+            font-size: 38px; width: 48px; height: 48px;
             display: flex; align-items: center; justify-content: center;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+            animation: foxBounce 0.6s infinite alternate ease-in-out;
+        }
+        @keyframes foxBounce {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-4px) scale(1.05); }
         }
     </style>
 </head>
@@ -297,32 +298,23 @@
 
         <!-- 夕焼けエンディング画面 -->
         <div id="ending-screen" class="hidden">
-            <!-- 夕日 -->
             <div class="sun"></div>
 
-            <!-- 白い雲 -->
             <div class="white-cloud" style="top: 10%; width: 90px; height: 26px; animation-delay: 0s;"></div>
             <div class="white-cloud" style="top: 22%; width: 120px; height: 32px; animation-delay: 6s;"></div>
             <div class="white-cloud" style="top: 15%; width: 85px; height: 24px; animation-delay: 11s;"></div>
 
-            <!-- 草原と手前広め・奥が右カーブの砂道 -->
             <div class="field-bg">
                 <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
-                    <!-- 道のベース（手前が広く、奥へ行くほど右へ曲がる） -->
                     <path d="M 200 0 Q 150 150 380 300 L 100 300 Q 110 150 160 0 Z" fill="#d49a55" />
-                    <!-- 両サイドの動く白点線車線 -->
                     <path class="road-line" d="M 163 0 Q 113 150 108 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
                     <path class="road-line" d="M 197 0 Q 147 150 372 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
                 </svg>
             </div>
 
-            <!-- 道幅にすっぽり収まるおかずたち -->
+            <!-- 中央の道路を背中を向けて奥へ走るきつね -->
             <div class="walking-troop">
-                <div class="troop-item">🦊</div>
-                <div class="troop-item">🦝</div>
-                <div class="troop-item">🍤</div>
-                <div class="troop-item">🥚</div>
-                <div class="troop-item">🥩</div>
+                <div class="fox-back">🦊</div>
             </div>
         </div>
     </div>
@@ -357,7 +349,6 @@
         
         const lanes = document.querySelectorAll('.lane');
 
-        // ★音声ブロックを確実に回避する最強のアンロック処理★
         function unlockAllAudio() {
             [defaultAudio, endingAudio].forEach(audio => {
                 audio.play().then(() => {
@@ -444,7 +435,6 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
             
-            // ending.mp3 の確実な再生処理
             endingAudio.currentTime = 0;
             const playPromise = endingAudio.play();
             if (playPromise !== undefined) {
