@@ -194,7 +194,7 @@
             mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 100%);
         }
 
-        /* 3:00 (180秒) かけてゆっくり上へ動くクレジット本体 */
+        /* 100秒かけてゆっくり上へ動くクレジット本体 */
         #credit-content {
             position: absolute;
             width: 100%;
@@ -210,9 +210,9 @@
             padding-bottom: 80px;
         }
 
-        /* スピード調整用（180s = 約3分で出し切る） */
+        /* スピード調整用（100s = 100秒で出し切る） */
         .scrolling {
-            animation: creditScroll 180s linear forwards;
+            animation: creditScroll 100s linear forwards;
         }
 
         @keyframes creditScroll {
@@ -446,7 +446,7 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
 
-            // クレジットのスクロールアニメーションを開始（180秒＝約3分で出し切る）
+            // クレジットのスクロールアニメーションを開始（100秒で出し切る）
             const creditContent = document.getElementById('credit-content');
             creditContent.classList.remove('scrolling');
             void creditContent.offsetWidth;
