@@ -168,52 +168,50 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 🎬 スタッフクレジット風スクロール歌詞付きエンディング --- */
+        /* --- 🎬 スタッフクレジット風エンディング（背景オーバーラップ仕様） --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('ending-bg.jpg');
-            background-size: contain;
+            /* 背景画像（中央配置・カバー表示）の上に、半透明のオーバーレイを重ねて文字を見やすくする */
+            background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('ending-bg.jpg');
+            background-size: cover;
             background-repeat: no-repeat;
-            background-position: center top;
-            background-color: #2c1810;
+            background-position: center center;
             overflow: hidden; z-index: 200;
         }
 
-        /* 下部スペース（歌詞が流れる枠） */
+        /* クレジット表示枠（下部） */
         #credit-box {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 180px; /* 歌詞表示エリアの高さを調整 */
+            height: 200px;
             overflow: hidden;
-            background: linear-gradient(to bottom, rgba(44, 24, 16, 0) 0%, rgba(44, 24, 16, 0.9) 30%);
             z-index: 210;
-            
-            /* 上部に近づくと歌詞が綺麗にフェードアウト（透明化）するグラデーションマスク */
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
-            mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
+            /* 上部に向かって自然にフェードアウトするマスク処理 */
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 100%);
         }
 
-        /* 下から上へゆっくりスクロールする歌詞文章のコンテナ */
+        /* 3:00 (180秒) かけてゆっくり上へ動くクレジット本体 */
         #credit-content {
             position: absolute;
             width: 100%;
-            top: 100%; /* 初期位置：枠の一番下からスタート */
+            top: 100%;
             left: 0;
             text-align: center;
             color: #ffffff;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             line-height: 2.2;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
             letter-spacing: 1px;
-            padding-bottom: 50px;
+            padding-bottom: 80px;
         }
 
-        /* スクロールアニメーション（100秒かけてゆっくり上へ動く） */
+        /* 約3分（180秒）かけて流し切るアニメーション */
         .scrolling {
-            animation: creditScroll 100s linear forwards;
+            animation: creditScroll 180s linear forwards;
         }
 
         @keyframes creditScroll {
@@ -221,8 +219,21 @@
                 transform: translateY(0);
             }
             100% {
-                transform: translateY(-100%);
+                transform: translateY(-110%);
             }
+        }
+
+        .credit-title {
+            color: var(--secondary);
+            font-size: 15px;
+            margin-top: 24px;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+        }
+        .credit-role {
+            color: #ffccbc;
+            font-size: 11px;
+            margin-top: 12px;
         }
     </style>
 </head>
@@ -288,44 +299,36 @@
             <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
-        <!-- エンディング画面（クレジット風スクロール） -->
+        <!-- エンディング画面（カービィエアライダー風スタッフクレジット＋背景画像オーバーラップ） -->
         <div id="ending-screen" class="hidden">
             <div id="credit-box">
                 <div id="credit-content">
-                    はるかな空と 地平線<br>
-                    大地に広がる 長き道<br>
-                    荷物を積んで 火を灯し<br>
-                    駆けるマシンは きょうも快調<br>
-                    <br>
-                    走れ！ 流星たちよ<br>
-                    地を蹴って ビュンとうなるスピードで<br>
-                    風の歌を奏でる 駆け抜けて<br>
-                    めざすゴールは あなたのものだ<br>
-                    <br>
-                    香る草木 青い海<br>
-                    アクセルふかして ひた走る<br>
-                    風をまとって 宙に舞い<br>
-                    マシンはひらり 夕焼けの旅<br>
-                    <br>
-                    飛べ！ 流星たちよ<br>
-                    放たれて その翼開け広げ<br>
-                    高くだれよりも遠く 突き抜けて<br>
-                    果てなき空は いつも自由だ<br>
-                    <br>
-                    闇を切り裂く 赤い星<br>
-                    テールランプが 弧を描く<br>
-                    夜が明けたら また行こう<br>
-                    マシンと 絆が 光り輝く<br>
-                    <br>
-                    走れ！ 流星たちよ<br>
-                    地を蹴って ビュンとうなるスピードで<br>
-                    風の歌を奏でる 駆け抜けて<br>
-                    めざすゴールは あなたのものだ<br>
-                    <br>
-                    飛べ！ 流星たちよ<br>
-                    放たれて その翼開け広げ<br>
-                    高くだれよりも遠く 突き抜けて<br>
-                    果てなき空は いつも自由だ
+                    <div class="credit-title">- DIRECT DIRECTOR -</div>
+                    A. KITSUNE<br><br>
+
+                    <div class="credit-role">GAME DESIGN</div>
+                    T. TANUKI<br>
+                    S. UDON<br><br>
+
+                    <div class="credit-role">PROGRAMMERS</div>
+                    M. SOUP<br>
+                    K. MEN<br><br>
+
+                    <div class="credit-role">GRAPHIC ARTISTS</div>
+                    E. TEMPURA<br>
+                    O. TSUKIMI<br><br>
+
+                    <div class="credit-role">SOUND & MUSIC</div>
+                    H. DASHI<br>
+                    B. G. M.<br><br>
+
+                    <div class="credit-title">- SPECIAL THANKS -</div>
+                    ALL UDON LOVERS<br>
+                    AND YOU!<br><br>
+
+                    <div class="credit-title">- PUBLISHED BY -</div>
+                    DASHIMARU GAMES<br><br><br>
+                    THANK YOU FOR PLAYING!
                 </div>
             </div>
         </div>
@@ -442,10 +445,9 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
 
-            // クレジットのスクロールアニメーションを開始
+            // クレジットのスクロールアニメーションを開始（180秒＝約3分で出し切る）
             const creditContent = document.getElementById('credit-content');
             creditContent.classList.remove('scrolling');
-            // リフローを発生させてアニメーションをリセット
             void creditContent.offsetWidth;
             creditContent.classList.add('scrolling');
 
