@@ -11,47 +11,30 @@
             --bg-color: #1a1a2e;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         html, body {
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
-            overflow-y: auto;
-            background-color: var(--bg-color);
-            color: #fff;
+            width: 100%; height: 100%;
+            overflow-x: hidden; overflow-y: auto;
+            background-color: var(--bg-color); color: #fff;
             font-family: 'Helvetica Neue', Arial, sans-serif;
         }
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 10px 0;
-            touch-action: manipulation;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            padding: 10px 0; touch-action: manipulation;
         }
 
         #game-container {
-            position: relative;
-            width: 100%;
-            max-width: 480px;
-            height: 820px;
+            position: relative; width: 100%; max-width: 480px; height: 820px;
             background: linear-gradient(135deg, #2c3e50, #111);
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 4px solid #333;
-            border-radius: 12px;
-            margin: auto;
+            display: flex; flex-direction: column; overflow: hidden;
+            border: 4px solid #333; border-radius: 12px; margin: auto;
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            background: rgba(0,0,0,0.6);
-            z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; background: rgba(0,0,0,0.6); z-index: 10;
             border-bottom: 2px solid rgba(255,255,255,0.1);
         }
         .score-box, .combo-box, .miss-box { text-align: center; }
@@ -60,27 +43,19 @@
         .miss-value { font-size: 17px; font-weight: bold; color: #f44336; }
 
         .stage-container {
-            position: relative;
-            height: 190px;
+            position: relative; height: 190px;
             background: radial-gradient(circle, #3a4454 0%, #111823 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 3px dashed rgba(255,255,255,0.2);
-            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: space-between; padding: 10px 0;
+            border-bottom: 3px dashed rgba(255,255,255,0.2); overflow: hidden;
         }
 
         .spotlight {
-            position: absolute;
-            top: -50%; left: 50%;
+            position: absolute; top: -50%; left: 50%;
             width: 200%; height: 200%;
             background: conic-gradient(from 0deg at 50% 50%, rgba(255,193,7,0.15) 0deg, transparent 30deg, rgba(255,193,7,0.15) 60deg, transparent 90deg, rgba(255,193,7,0.15) 120deg, transparent 150deg);
-            transform: translate(-50%, 0);
-            animation: rotateLight 12s linear infinite;
-            pointer-events: none;
-            z-index: 1;
+            transform: translate(-50%, 0); animation: rotateLight 12s linear infinite;
+            pointer-events: none; z-index: 1;
         }
         @keyframes rotateLight {
             0% { transform: translate(-50%, 0) rotate(0deg); }
@@ -88,49 +63,27 @@
         }
 
         .bowl {
-            width: 120px; height: 40px;
-            background: #e0e0e0;
+            width: 120px; height: 40px; background: #e0e0e0;
             border-bottom-left-radius: 60px; border-bottom-right-radius: 60px;
-            border: 3px solid #b0b0b0;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 5;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            border: 3px solid #b0b0b0; display: flex; align-items: center; justify-content: center;
+            z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.6);
         }
         .bowl-text { font-size: 12px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
 
         .dancers-stage {
-            position: relative;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-end;
-            padding: 0 10px;
-            z-index: 4;
-            height: 90px;
+            position: relative; width: 100%; display: flex;
+            justify-content: space-around; align-items: flex-end;
+            padding: 0 10px; z-index: 4; height: 90px;
         }
-        .dancer-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transform-origin: bottom center;
-        }
+        .dancer-card { display: flex; flex-direction: column; align-items: center; transform-origin: bottom center; }
         .dancer-icon {
-            width: 44px; height: 44px;
-            border-radius: 50%;
-            background: #fff;
-            border: 3px solid var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            width: 44px; height: 44px; border-radius: 50%; background: #fff;
+            border: 3px solid var(--primary); display: flex; align-items: center; justify-content: center;
+            font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
         .dancer-label {
-            font-size: 9px;
-            font-weight: bold;
-            margin-top: 3px;
-            background: rgba(0,0,0,0.7);
-            padding: 2px 5px;
-            border-radius: 4px;
-            color: var(--secondary);
+            font-size: 9px; font-weight: bold; margin-top: 3px;
+            background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 4px; color: var(--secondary);
         }
 
         @keyframes danceLeftRight {
@@ -146,15 +99,13 @@
         .dancing .dancer-card:nth-child(5) { animation: danceLeftRight 0.4s 0.32s infinite alternate ease-in-out; }
 
         .play-area {
-            position: relative; flex: 1;
-            display: flex; justify-content: space-between;
+            position: relative; flex: 1; display: flex; justify-content: space-between;
             padding: 0 5px; background: rgba(0,0,0,0.3); overflow: hidden;
         }
         .lane {
             position: relative; width: 19%; height: 100%;
             background: rgba(255,255,255,0.03);
-            border-left: 1px solid rgba(255,255,255,0.08);
-            border-right: 1px solid rgba(255,255,255,0.08);
+            border-left: 1px solid rgba(255,255,255,0.08); border-right: 1px solid rgba(255,255,255,0.08);
             display: flex; flex-direction: column; align-items: center;
         }
         .lane-title {
@@ -165,24 +116,22 @@
             position: absolute; bottom: 130px; width: 100%; height: 6px;
             background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4;
         }
-        
+
         .note {
             position: absolute; width: 90%; height: 44px; border-radius: 10px;
             background: linear-gradient(135deg, rgba(255,152,0,0.9), rgba(245,124,0,0.9));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px;
+            display: flex; align-items: center; justify-content: center; font-size: 22px;
             border: 2px solid rgba(255,255,255,0.9); z-index: 5;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-            top: -50px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4); top: -50px;
         }
-        
+
         #feedback {
             position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
             font-size: 26px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0;
             transition: opacity 0.1s; text-align: center; white-space: nowrap;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
-        
+
         .control-panel {
             height: 90px; background: rgba(0,0,0,0.8);
             display: flex; justify-content: space-around; align-items: center; padding: 0 5px;
@@ -197,7 +146,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .hit-btn:active { transform: scale(0.92); background: #bf360c; }
-        
+
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 15, 25, 0.95);
@@ -212,58 +161,68 @@
         }
         .btn-main:active { transform: scale(0.95); }
         .hidden { display: none !important; }
-        
+
         #countdown-overlay {
             position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
             font-size: 56px; font-weight: bold; color: var(--secondary);
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 流星の路（エンディング演出）専用スタイル --- */
+        /* --- 🎬 スタッフクレジット風スクロール歌詞付きエンディング --- */
         #ending-screen {
-            background: linear-gradient(180deg, #0b0b1a 0%, #1a0b2e 100%);
-            overflow: hidden;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('ending-bg.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center top;
+            background-color: #2c1810;
+            overflow: hidden; z-index: 200;
         }
-        .shooting-star {
+
+        /* 下部スペース（歌詞が流れる枠） */
+        #credit-box {
             position: absolute;
-            width: 100px; height: 2px;
-            background: linear-gradient(90deg, #fff, transparent);
-            transform: rotate(-35deg);
-            opacity: 0;
-            animation: shoot 4s infinite linear;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 180px; /* 歌詞表示エリアの高さを調整 */
+            overflow: hidden;
+            background: linear-gradient(to bottom, rgba(44, 24, 16, 0) 0%, rgba(44, 24, 16, 0.9) 30%);
+            z-index: 210;
+            
+            /* 上部に近づくと歌詞が綺麗にフェードアウト（透明化）するグラデーションマスク */
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
         }
-        @keyframes shoot {
-            0% { transform: translate(300px, -100px) rotate(-35deg); opacity: 1; }
-            30% { transform: translate(-200px, 200px) rotate(-35deg); opacity: 0; }
-            100% { transform: translate(-200px, 200px) rotate(-35deg); opacity: 0; }
+
+        /* 下から上へゆっくりスクロールする歌詞文章のコンテナ */
+        #credit-content {
+            position: absolute;
+            width: 100%;
+            top: 100%; /* 初期位置：枠の一番下からスタート */
+            left: 0;
+            text-align: center;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 2.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 1px;
+            padding-bottom: 50px;
         }
-        .road-horizon {
-            position: absolute; bottom: 0; width: 100%; height: 55%;
-            background: linear-gradient(180deg, #222 0%, #0d0d14 100%);
-            clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
-            border-top: 2px solid rgba(255,255,255,0.2);
+
+        /* スクロールアニメーション（100秒かけてゆっくり上へ動く） */
+        .scrolling {
+            animation: creditScroll 100s linear forwards;
         }
-        .walking-troop {
-            position: absolute; bottom: 120px; left: 50%;
-            transform: translateX(-50%);
-            display: flex; gap: 20px;
-            animation: walkIntoDistance 8s infinite linear;
-        }
-        @keyframes walkIntoDistance {
-            0% { transform: translateX(-50%) scale(1); bottom: 100px; opacity: 1; }
-            100% { transform: translateX(-50%) scale(0.2); bottom: 320px; opacity: 0.6; }
-        }
-        .back-walker {
-            font-size: 28px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%; width: 45px; height: 45px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 10px rgba(255,255,255,0.2);
-            animation: stepBounce 0.6s infinite alternate ease-in-out;
-        }
-        @keyframes stepBounce {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-6px); }
+
+        @keyframes creditScroll {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-100%);
+            }
         }
     </style>
 </head>
@@ -275,10 +234,10 @@
             <div class="miss-box"><div class="label">MISS残数</div><div id="miss-left" class="miss-value">20</div></div>
         </div>
 
-        <div class="stage-container">
+        <div class="stage-container" id="stage-container">
             <div class="spotlight"></div>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
-            
+
             <div class="dancers-stage dancing">
                 <div class="dancer-card"><div class="dancer-icon">🦊</div><div class="dancer-label">きつね</div></div>
                 <div class="dancer-card"><div class="dancer-icon">🦝</div><div class="dancer-label">たぬき</div></div>
@@ -312,12 +271,11 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:5px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:11px; color:#ccc; line-height:1.5; max-width: 320px; margin-bottom: 10px;">
-                レーンに一致する具材アイコンが高確率で登場！<br>
+                注文レーンと一致するおかずを<br>
                 リズムに合わせて正しくタップしよう！<br>
                 <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
-            <!-- テスト用エンディング確認ボタン -->
             <button class="btn-main" id="test-ending-btn" style="background: linear-gradient(135deg, #4caf50, #2e7d32); margin-top: 10px; font-size: 13px; padding: 10px 20px;">🎬 [テスト] エンディングを見る</button>
         </div>
 
@@ -330,24 +288,45 @@
             <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
-        <!-- 流星の路風エンディング画面 -->
-        <div id="ending-screen" class="overlay hidden">
-            <div class="shooting-star" style="top: 20%; left: 70%; animation-delay: 0s;"></div>
-            <div class="shooting-star" style="top: 40%; left: 80%; animation-delay: 2s;"></div>
-            <div class="road-horizon"></div>
-            
-            <div class="walking-troop">
-                <div class="back-walker">🦊</div>
-                <div class="back-walker">🦝</div>
-                <div class="back-walker">🍤</div>
-                <div class="back-walker">🥚</div>
-                <div class="back-walker">🥩</div>
-            </div>
-
-            <div style="position: absolute; bottom: 40px; z-index: 10; text-align: center; width: 100%;">
-                <h3 style="color: var(--secondary); font-size: 18px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Starlit Journey</h3>
-                <p style="font-size: 11px; color: #bbb; margin-bottom: 15px; text-shadow: 0 0 5px rgba(0,0,0,0.8);">果てなき空は いつも自由だ</p>
-                <button class="btn-main" id="ending-restart-btn" style="padding: 10px 25px; font-size: 15px;">タイトルへもどる</button>
+        <!-- エンディング画面（クレジット風スクロール） -->
+        <div id="ending-screen" class="hidden">
+            <div id="credit-box">
+                <div id="credit-content">
+                    はるかな空と 地平線<br>
+                    大地に広がる 長き道<br>
+                    荷物を積んで 火を灯し<br>
+                    駆けるマシンは きょうも快調<br>
+                    <br>
+                    走れ！ 流星たちよ<br>
+                    地を蹴って ビュンとうなるスピードで<br>
+                    風の歌を奏でる 駆け抜けて<br>
+                    めざすゴールは あなたのものだ<br>
+                    <br>
+                    香る草木 青い海<br>
+                    アクセルふかして ひた走る<br>
+                    風をまとって 宙に舞い<br>
+                    マシンはひらり 夕焼けの旅<br>
+                    <br>
+                    飛べ！ 流星たちよ<br>
+                    放たれて その翼開け広げ<br>
+                    高くだれよりも遠く 突き抜けて<br>
+                    果てなき空は いつも自由だ<br>
+                    <br>
+                    闇を切り裂く 赤い星<br>
+                    テールランプが 弧を描く<br>
+                    夜が明けたら また行こう<br>
+                    マシンと 絆が 光り輝く<br>
+                    <br>
+                    走れ！ 流星たちよ<br>
+                    地を蹴って ビュンとうなるスピードで<br>
+                    風の歌を奏でる 駆け抜けて<br>
+                    めざすゴールは あなたのものだ<br>
+                    <br>
+                    飛べ！ 流星たちよ<br>
+                    放たれて その翼開け広げ<br>
+                    高くだれよりも遠く 突き抜けて<br>
+                    果てなき空は いつも自由だ
+                </div>
             </div>
         </div>
     </div>
@@ -360,7 +339,7 @@
             { name: "つきみ", icon: "🥚" },
             { name: "おにく", icon: "🥩" }
         ];
-        
+
         const START_DELAY = 10.0; 
         const TOTAL_GAME_DURATION = 135.0;
         const MAX_MISS_ALLOWED = 20;
@@ -371,14 +350,24 @@
         let startTime = 0;
         let activeNotes = [], countdownTimer = null, animId = null;
         let resultTimeout = null;
-        
-        const defaultAudio = new Audio('udon.mp3');
-        defaultAudio.volume = 0.9;
 
-        const endingAudio = new Audio('ending.mp3'); 
-        endingAudio.volume = 0.8;
-        
+        const bgm = new Audio();
+        bgm.volume = 0.9;
+
         const lanes = document.querySelectorAll('.lane');
+
+        function unlockAudio() {
+            bgm.src = 'udon.mp3';
+            bgm.load();
+            bgm.play().then(() => {
+                bgm.pause();
+                bgm.currentTime = 0;
+            }).catch(() => {});
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+        }
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
 
         let audioCtx = null;
         function playSound(type) {
@@ -445,21 +434,33 @@
             cancelAnimationFrame(animId);
             if (countdownTimer) clearInterval(countdownTimer);
             if (resultTimeout) clearTimeout(resultTimeout);
-            defaultAudio.pause();
+
+            bgm.pause();
+            bgm.currentTime = 0;
 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
-            
-            endingAudio.currentTime = 0;
-            endingAudio.play().catch(err => console.log("Ending audio play error (404 check ending.mp3):", err));
+
+            // クレジットのスクロールアニメーションを開始
+            const creditContent = document.getElementById('credit-content');
+            creditContent.classList.remove('scrolling');
+            // リフローを発生させてアニメーションをリセット
+            void creditContent.offsetWidth;
+            creditContent.classList.add('scrolling');
+
+            bgm.src = 'ending.mp3';
+            bgm.volume = 0.8;
+            bgm.currentTime = 0;
+            bgm.play().catch(err => {
+                console.log("ending.mp3再生エラー:", err);
+            });
         }
 
         function startGame() {
             score = 0; combo = 0; missCount = 0;
             perfectCount = 0; goodCount = 0;
             if (resultTimeout) clearTimeout(resultTimeout);
-            endingAudio.pause();
 
             document.getElementById('score').innerText = '0';
             document.getElementById('combo').innerText = '0';
@@ -481,8 +482,12 @@
                 return { id: index, el: el, removed: false, lane: item.lane, type: item.type, targetTime: targetTime };
             });
 
-            defaultAudio.currentTime = 0;
-            defaultAudio.play().catch(err => console.log(err));
+            bgm.src = 'udon.mp3';
+            bgm.volume = 0.9;
+            bgm.currentTime = 0;
+            bgm.play().catch(err => {
+                console.log("udon.mp3再生エラー:", err);
+            });
 
             const cdEl = document.getElementById('countdown-overlay');
             cdEl.classList.remove('hidden');
@@ -561,7 +566,7 @@
 
         function judgeLane(laneIndex) {
             if (!gameActive || isCountingDown) return;
-            
+
             const playAreaHeight = lanes[0].clientHeight;
             const targetLinePixelFromTop = playAreaHeight - 130; 
             let hitFound = false;
@@ -629,7 +634,7 @@
             isCountingDown = false;
             cancelAnimationFrame(animId);
             if (countdownTimer) clearInterval(countdownTimer);
-            defaultAudio.pause();
+            bgm.pause();
 
             const titleEl = document.getElementById('result-title');
             const detailEl = document.getElementById('res-detail');
@@ -665,13 +670,14 @@
             });
         });
 
-        document.getElementById('start-btn').addEventListener('click', startGame);
-        document.getElementById('restart-btn').addEventListener('click', startGame);
-        document.getElementById('test-ending-btn').addEventListener('click', triggerEnding);
-        document.getElementById('ending-restart-btn').addEventListener('click', () => {
-            endingAudio.pause();
-            document.getElementById('ending-screen').classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
+        document.getElementById('start-btn').addEventListener('click', () => {
+            startGame();
+        });
+        document.getElementById('test-ending-btn').addEventListener('click', () => {
+            triggerEnding();
+        });
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            startGame();
         });
     </script>
 </body>
