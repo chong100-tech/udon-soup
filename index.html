@@ -161,9 +161,8 @@
             font-size: 9px; font-weight: bold; color: #ffca28; margin-top: 5px; opacity: 0.85;
             background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 4px;
         }
-        /* 判定ライン（黄色の線）を画面半分より上（下から320px）に配置 */
         .target-line {
-            position: absolute; bottom: 320px; width: 100%; height: 6px;
+            position: absolute; bottom: 130px; width: 100%; height: 6px;
             background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4;
         }
         
@@ -175,11 +174,10 @@
             border: 2px solid rgba(255,255,255,0.9); z-index: 5;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
             top: -50px;
-            transition: opacity 0.2s;
         }
         
         #feedback {
-            position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
             font-size: 26px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0;
             transition: opacity 0.1s; text-align: center; white-space: nowrap;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
@@ -221,14 +219,51 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- エンディング画面（きつねの ending-bg 画像背景でプレイ画面を隠す） --- */
+        /* --- 流星の路（エンディング演出）専用スタイル --- */
         #ending-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('ending-bg') no-repeat center center;
-            background-size: cover;
-            z-index: 200; /* プレイ画面や他の要素より確実に手前に表示 */
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-            padding-bottom: 40px;
+            background: linear-gradient(180deg, #0b0b1a 0%, #1a0b2e 100%);
+            overflow: hidden;
+        }
+        .shooting-star {
+            position: absolute;
+            width: 100px; height: 2px;
+            background: linear-gradient(90deg, #fff, transparent);
+            transform: rotate(-35deg);
+            opacity: 0;
+            animation: shoot 4s infinite linear;
+        }
+        @keyframes shoot {
+            0% { transform: translate(300px, -100px) rotate(-35deg); opacity: 1; }
+            30% { transform: translate(-200px, 200px) rotate(-35deg); opacity: 0; }
+            100% { transform: translate(-200px, 200px) rotate(-35deg); opacity: 0; }
+        }
+        .road-horizon {
+            position: absolute; bottom: 0; width: 100%; height: 55%;
+            background: linear-gradient(180deg, #222 0%, #0d0d14 100%);
+            clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
+            border-top: 2px solid rgba(255,255,255,0.2);
+        }
+        .walking-troop {
+            position: absolute; bottom: 120px; left: 50%;
+            transform: translateX(-50%);
+            display: flex; gap: 20px;
+            animation: walkIntoDistance 8s infinite linear;
+        }
+        @keyframes walkIntoDistance {
+            0% { transform: translateX(-50%) scale(1); bottom: 100px; opacity: 1; }
+            100% { transform: translateX(-50%) scale(0.2); bottom: 320px; opacity: 0.6; }
+        }
+        .back-walker {
+            font-size: 28px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            animation: stepBounce 0.6s infinite alternate ease-in-out;
+        }
+        @keyframes stepBounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-6px); }
         }
     </style>
 </head>
@@ -277,7 +312,7 @@
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--secondary); margin-bottom:5px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
             <p style="font-size:11px; color:#ccc; line-height:1.5; max-width: 320px; margin-bottom: 10px;">
-                注文レーンに一致するおかずを<br>
+                レーンに一致する具材アイコンが高確率で登場！<br>
                 リズムに合わせて正しくタップしよう！<br>
                 <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
@@ -295,9 +330,25 @@
             <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
-        <!-- エンディング画面（ending-bg 背景画像） -->
-        <div id="ending-screen" class="hidden">
-            <button class="btn-main" id="ending-restart-btn" style="padding: 10px 25px; font-size: 15px; background: rgba(0,0,0,0.7); border: 2px solid var(--secondary);">タイトルへもどる</button>
+        <!-- 流星の路風エンディング画面 -->
+        <div id="ending-screen" class="overlay hidden">
+            <div class="shooting-star" style="top: 20%; left: 70%; animation-delay: 0s;"></div>
+            <div class="shooting-star" style="top: 40%; left: 80%; animation-delay: 2s;"></div>
+            <div class="road-horizon"></div>
+            
+            <div class="walking-troop">
+                <div class="back-walker">🦊</div>
+                <div class="back-walker">🦝</div>
+                <div class="back-walker">🍤</div>
+                <div class="back-walker">🥚</div>
+                <div class="back-walker">🥩</div>
+            </div>
+
+            <div style="position: absolute; bottom: 40px; z-index: 10; text-align: center; width: 100%;">
+                <h3 style="color: var(--secondary); font-size: 18px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">Starlit Journey</h3>
+                <p style="font-size: 11px; color: #bbb; margin-bottom: 15px; text-shadow: 0 0 5px rgba(0,0,0,0.8);">果てなき空は いつも自由だ</p>
+                <button class="btn-main" id="ending-restart-btn" style="padding: 10px 25px; font-size: 15px;">タイトルへもどる</button>
+            </div>
         </div>
     </div>
 
@@ -461,8 +512,8 @@
             if (!gameActive) return;
             const elapsed = (performance.now() - startTime) / 1000;
             const playAreaHeight = lanes[0].clientHeight;
-            const fallDuration = 1.6; 
-            const targetLineBottom = 320; // 画面半分より上（下から320px）
+            const fallDuration = 2.0;
+            const targetLineBottom = 130; 
 
             let allCleared = true;
 
@@ -476,19 +527,18 @@
                         const totalTravel = playAreaHeight - targetLineBottom;
                         const currentTop = progress * totalTravel;
 
-                        if (progress <= 1.3) {
+                        if (progress <= 1.4) {
                             obj.el.style.top = currentTop + 'px';
                         }
                     }
 
                     const targetLinePixelFromTop = playAreaHeight - targetLineBottom;
                     const noteTop = parseFloat(obj.el.style.top) || -50;
+                    const noteBottom = noteTop + 44;
 
-                    if (noteTop > targetLinePixelFromTop + 35) {
+                    if (noteBottom > targetLinePixelFromTop + 60) {
                         obj.removed = true;
-                        obj.el.style.opacity = '0'; 
-                        setTimeout(() => obj.el.remove(), 200);
-                        
+                        obj.el.remove();
                         if (obj.type === obj.lane) {
                             handleMiss();
                         }
@@ -513,7 +563,7 @@
             if (!gameActive || isCountingDown) return;
             
             const playAreaHeight = lanes[0].clientHeight;
-            const targetLinePixelFromTop = playAreaHeight - 320; 
+            const targetLinePixelFromTop = playAreaHeight - 130; 
             let hitFound = false;
 
             for (let obj of activeNotes) {
@@ -527,11 +577,10 @@
                     if (absDistance <= 45) {
                         hitFound = true;
                         obj.removed = true; 
-                        obj.el.style.opacity = '0'; 
-                        setTimeout(() => obj.el.remove(), 150);    
+                        obj.el.remove();    
 
                         if (obj.type === laneIndex) {
-                            if (absDistance <= 14) {
+                            if (absDistance <= 12) {
                                 score += 300; combo++;
                                 perfectCount++;
                                 showFeedback('PERFECT!', '#ffeb3b');
