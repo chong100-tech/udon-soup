@@ -168,75 +168,15 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 🦊 自然の夕焼け＆四つ足キツネの最新エンディング演出 --- */
+        /* --- 🎨 いただいたイラストをそのまま使うエンディング画面 --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            /* イラストのような美しい夕焼けのグラデーション空 */
-            background: linear-gradient(180deg, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
+            background-image: url('ending-bg.jpg'); /* ご用意いただく画像ファイル名 */
+            background-size: cover;
+            background-position: center;
             overflow: hidden; z-index: 200;
             display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-        }
-
-        /* 大きな夕日 */
-        .sun {
-            position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
-            width: 120px; height: 120px; background: radial-gradient(circle, #fff 40%, #ffe082 70%, rgba(255,255,255,0) 100%);
-            border-radius: 50%; box-shadow: 0 0 40px #ffb300; pointer-events: none;
-        }
-
-        /* 流れる白い雲 */
-        .white-cloud {
-            position: absolute; background: #ffffff;
-            border-radius: 30px; opacity: 0.9;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            animation: cloudMove 16s infinite linear; pointer-events: none;
-        }
-        .white-cloud::before, .white-cloud::after {
-            content: ''; position: absolute; background: #ffffff; border-radius: 50%;
-        }
-        .white-cloud::before { width: 40px; height: 40px; top: -18px; left: 15px; }
-        .white-cloud::after { width: 30px; height: 30px; top: -12px; left: 42px; }
-
-        @keyframes cloudMove {
-            0% { transform: translateX(-160px); }
-            100% { transform: translateX(520px); }
-        }
-
-        /* 緑の地面（草原） */
-        .field-bg {
-            position: absolute; bottom: 0; width: 100%; height: 58%;
-            background: linear-gradient(to bottom, #81c784 0%, #388e3c 100%); overflow: hidden;
-        }
-
-        /* 砂の道と流れる点線（右カーブ） */
-        .road-svg {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
-        }
-        .road-line {
-            stroke-dasharray: 12 12;
-            animation: roadMove 0.8s infinite linear;
-        }
-        @keyframes roadMove {
-            0% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: -24; }
-        }
-
-        /* 🐾 四つ足で歩くキツネ（後ろ姿をイラスト風に綺麗に配置＆アニメーション） */
-        .walking-troop {
-            position: absolute; bottom: 100px; left: 50%;
-            transform: translateX(-50%); z-index: 10;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .fox-running-art {
-            font-size: 50px; width: 60px; height: 60px;
-            display: flex; align-items: center; justify-content: center;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
-            /* キツネが元気に奥へ向かって走っているようなアニメーション */
-            animation: foxRunAnim 0.5s infinite alternate ease-in-out;
-        }
-        @keyframes foxRunAnim {
-            0% { transform: translateY(0) scale(1) rotate(-1deg); }
-            100% { transform: translateY(-6px) scale(1.04) rotate(1deg); }
+            padding-bottom: 30px;
         }
     </style>
 </head>
@@ -302,31 +242,9 @@
             <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
-        <!-- ✨ 夕焼けエンディング画面（イラストの世界観を完全再現） ✨ -->
+        <!-- ✨ イラストそのままのエンディング画面 ✨ -->
         <div id="ending-screen" class="hidden">
-            <!-- 夕日 -->
-            <div class="sun"></div>
-
-            <!-- 空の白い雲（アニメーション） -->
-            <div class="white-cloud" style="top: 10%; width: 90px; height: 26px; animation-delay: 0s;"></div>
-            <div class="white-cloud" style="top: 22%; width: 120px; height: 32px; animation-delay: 6s;"></div>
-            <div class="white-cloud" style="top: 15%; width: 85px; height: 24px; animation-delay: 11s;"></div>
-
-            <!-- 緑の草原と右カーブの砂道 -->
-            <div class="field-bg">
-                <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
-                    <!-- 奥へ続く右カーブの砂道 -->
-                    <path d="M 190 0 Q 150 150 380 300 L 110 300 Q 120 150 150 0 Z" fill="#d49a55" />
-                    <!-- 流れる白い車線（走っている臨場感を演出） -->
-                    <path class="road-line" d="M 170 0 Q 135 150 115 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
-                    <path class="road-line" d="M 180 0 Q 142 150 375 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
-                </svg>
-            </div>
-
-            <!-- 道の中央を走る、四つ足キツネの後ろ姿アニメーション -->
-            <div class="walking-troop">
-                <div class="fox-running-art">🦊🏃</div>
-            </div>
+            <!-- イラスト背景のみで美しく魅せる -->
         </div>
     </div>
 
