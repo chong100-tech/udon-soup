@@ -168,38 +168,57 @@
             text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
         }
 
-        /* --- 🎨 イラスト＆歌詞付きエンディング画面 --- */
+        /* --- 🎬 スタッフクレジット風スクロール歌詞付きエンディング --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('ending-bg.jpg');
             background-size: contain;
             background-repeat: no-repeat;
-            background-position: center top; /* イラストを上に寄せて、下に余白を作る */
-            background-color: #2c1810; /* 下部の余白（茶色の背景スペース） */
+            background-position: center top;
+            background-color: #2c1810;
             overflow: hidden; z-index: 200;
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-            padding-bottom: 25px;
         }
 
-        /* 下部の茶色スペースに配置する歌詞テキストエリア */
-        #lyric-container {
+        /* 下部スペース（歌詞が流れる枠） */
+        #credit-box {
+            position: absolute;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 15px;
-            text-align: center;
+            height: 120px; /* スクロール表示用エリアの高さ */
+            overflow: hidden;
+            background: linear-gradient(to bottom, rgba(44, 24, 16, 0) 0%, rgba(44, 24, 16, 0.9) 20%);
             z-index: 210;
         }
 
-        #lyric-text {
-            font-size: 15px;
-            font-weight: bold;
+        /* 下から上へゆっくりスクロールする歌詞文章のコンテナ */
+        #credit-content {
+            position: absolute;
+            width: 100%;
+            top: 100%; /* 初期位置：枠の一番下からスタート */
+            left: 0;
+            text-align: center;
             color: #ffffff;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 2.2;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
             letter-spacing: 1px;
-            transition: opacity 0.3s ease-in-out;
+            padding-bottom: 50px;
+        }
+
+        /* スクロールアニメーション（100秒かけてゆっくり上へ動く） */
+        .scrolling {
+            animation: creditScroll 100s linear forwards;
+        }
+
+        @keyframes creditScroll {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-100%);
+            }
         }
     </style>
 </head>
@@ -265,10 +284,45 @@
             <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
-        <!-- エンディング画面（イラスト ＋ 下部スペースに歌詞表示） -->
+        <!-- エンディング画面（クレジット風スクロール） -->
         <div id="ending-screen" class="hidden">
-            <div id="lyric-container">
-                <div id="lyric-text"></div>
+            <div id="credit-box">
+                <div id="credit-content">
+                    はるかな空と 地平線<br>
+                    大地に広がる 長き道<br>
+                    荷物を積んで 火を灯し<br>
+                    駆けるマシンは きょうも快調<br>
+                    <br>
+                    走れ！ 流星たちよ<br>
+                    地を蹴って ビュンとうなるスピードで<br>
+                    風の歌を奏でる 駆け抜けて<br>
+                    めざすゴールは あなたのものだ<br>
+                    <br>
+                    香る草木 青い海<br>
+                    アクセルふかして ひた走る<br>
+                    風をまとって 宙に舞い<br>
+                    マシンはひらり 夕焼けの旅<br>
+                    <br>
+                    飛べ！ 流星たちよ<br>
+                    放たれて その翼開け広げ<br>
+                    高くだれよりも遠く 突き抜けて<br>
+                    果てなき空は いつも自由だ<br>
+                    <br>
+                    闇を切り裂く 赤い星<br>
+                    テールランプが 弧を描く<br>
+                    夜が明けたら また行こう<br>
+                    マシンと 絆が 光り輝く<br>
+                    <br>
+                    走れ！ 流星たちよ<br>
+                    地を蹴って ビュンとうなるスピードで<br>
+                    風の歌を奏でる 駆け抜けて<br>
+                    めざすゴールは あなたのものだ<br>
+                    <br>
+                    飛べ！ 流星たちよ<br>
+                    放たれて その翼開け広げ<br>
+                    高くだれよりも遠く 突き抜けて<br>
+                    果てなき空は いつも自由だ
+                </div>
             </div>
         </div>
     </div>
@@ -292,45 +346,11 @@
         let startTime = 0;
         let activeNotes = [], countdownTimer = null, animId = null;
         let resultTimeout = null;
-        let lyricTimer = null;
         
         const bgm = new Audio();
         bgm.volume = 0.9;
         
         const lanes = document.querySelectorAll('.lane');
-
-        // 歌の歌詞データ（秒数 ＆ テキスト）
-        // ※曲のテンポに合わせて、何秒目にどの行を表示するかを調整しています
-        const lyricsData = [
-            { time: 0.0, text: "はるかな空と 地平線" },
-            { time: 3.5, text: "大地に広がる 長き道" },
-            { time: 7.0, text: "荷物を積んで 火を灯し" },
-            { time: 10.5, text: "駆けるマシンは きょうも快調" },
-            { time: 14.5, text: "走れ！ 流星たちよ" },
-            { time: 18.0, text: "地を蹴って ビュンとうなるスピードで" },
-            { time: 21.5, text: "風の歌を奏でる 駆け抜けて" },
-            { time: 25.0, text: "めざすゴールは あなたのものだ" },
-            { time: 29.0, text: "香る草木 青い海" },
-            { time: 32.5, text: "アクセルふかして ひた走る" },
-            { time: 36.0, text: "風をまとって 宙に舞い" },
-            { time: 39.5, text: "マシンはひらり 夕焼けの旅" },
-            { time: 43.5, text: "飛べ！ 流星たちよ" },
-            { time: 47.0, text: "放たれて その翼開け広げ" },
-            { time: 50.5, text: "高くだれよりも遠く 突き抜けて" },
-            { time: 54.0, text: "果てなき空は いつも自由だ" },
-            { time: 58.0, text: "闇を切り裂く 赤い星" },
-            { time: 61.5, text: "テールランプが 弧を描く" },
-            { time: 65.0, text: "夜が明けたら また行こう" },
-            { time: 68.5, text: "マシンと 絆が 光り輝く" },
-            { time: 72.5, text: "走れ！ 流星たちよ" },
-            { time: 76.0, text: "地を蹴って ビュンとうなるスピードで" },
-            { time: 79.5, text: "風の歌を奏でる 駆け抜けて" },
-            { time: 83.0, text: "めざすゴールは あなたのものだ" },
-            { time: 87.0, text: "飛べ！ 流星たちよ" },
-            { time: 90.5, text: "放たれて その翼開け広げ" },
-            { time: 94.0, text: "高くだれよりも遠く 突き抜けて" },
-            { time: 97.5, text: "果てなき空は いつも自由だ" }
-        ];
 
         function unlockAudio() {
             bgm.src = 'udon.mp3';
@@ -404,27 +424,6 @@
             return timings;
         }
 
-        function startLyricSync() {
-            const lyricTextEl = document.getElementById('lyric-text');
-            if (lyricTimer) clearInterval(lyricTimer);
-
-            lyricTimer = setInterval(() => {
-                if (bgm.paused) return;
-                const currentTime = bgm.currentTime;
-                
-                // 現在の再生時間に一致する歌詞を探す
-                let currentLine = "";
-                for (let i = 0; i < lyricsData.length; i++) {
-                    if (currentTime >= lyricsData[i].time) {
-                        currentLine = lyricsData[i].text;
-                    } else {
-                        break;
-                    }
-                }
-                lyricTextEl.innerText = currentLine;
-            }, 200);
-        }
-
         function triggerEnding() {
             gameActive = false;
             isCountingDown = false;
@@ -439,12 +438,17 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
             
+            // クレジットのスクロールアニメーションを開始
+            const creditContent = document.getElementById('credit-content');
+            creditContent.classList.remove('scrolling');
+            // リフローを発生させてアニメーションをリセット
+            void creditContent.offsetWidth;
+            creditContent.classList.add('scrolling');
+
             bgm.src = 'ending.mp3';
             bgm.volume = 0.8;
             bgm.currentTime = 0;
-            bgm.play().then(() => {
-                startLyricSync();
-            }).catch(err => {
+            bgm.play().catch(err => {
                 console.log("ending.mp3再生エラー:", err);
             });
         }
@@ -453,7 +457,6 @@
             score = 0; combo = 0; missCount = 0;
             perfectCount = 0; goodCount = 0;
             if (resultTimeout) clearTimeout(resultTimeout);
-            if (lyricTimer) clearInterval(lyricTimer);
 
             document.getElementById('score').innerText = '0';
             document.getElementById('combo').innerText = '0';
