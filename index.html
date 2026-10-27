@@ -333,13 +333,11 @@
         let activeNotes = [], countdownTimer = null, animId = null;
         let resultTimeout = null;
         
-        // 1つのオーディオプレイヤーインスタンスを安全に使い回す仕組み
         const bgm = new Audio();
         bgm.volume = 0.9;
         
         const lanes = document.querySelectorAll('.lane');
 
-        // タップ時に音声をアンロックして準備完了にする
         function unlockAudio() {
             bgm.src = 'udon.mp3';
             bgm.load();
@@ -426,7 +424,6 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
             
-            // ending.mp3 を再生
             bgm.src = 'ending.mp3';
             bgm.volume = 0.8;
             bgm.currentTime = 0;
@@ -460,7 +457,6 @@
                 return { id: index, el: el, removed: false, lane: item.lane, type: item.type, targetTime: targetTime };
             });
 
-            // udon.mp3 を再生
             bgm.src = 'udon.mp3';
             bgm.volume = 0.9;
             bgm.currentTime = 0;
@@ -651,6 +647,9 @@
 
         document.getElementById('start-btn').addEventListener('click', () => {
             startGame();
+        });
+        document.getElementById('test-ending-btn').addEventListener('click', () => {
+            triggerEnding();
         });
         document.getElementById('restart-btn').addEventListener('click', () => {
             startGame();
