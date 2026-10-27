@@ -32,115 +32,226 @@
             border: 4px solid #333; border-radius: 12px; margin: auto;
         }
 
-        /* --- ゲーム画面のスタイル（省略） --- */
-        /* ※前回のコードと同じため、見やすさのために省略していますが、 */
-        /* 本番のファイルにはすべてのスタイルを入れてください。 */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(0,0,0,0.6); z-index: 10; border-bottom: 2px solid rgba(255,255,255,0.1); }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; background: rgba(0,0,0,0.6); z-index: 10;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
         .score-box, .combo-box, .miss-box { text-align: center; }
         .label { font-size: 10px; color: #aaa; }
         .value { font-size: 17px; font-weight: bold; color: var(--secondary); }
         .miss-value { font-size: 17px; font-weight: bold; color: #f44336; }
-        .stage-container { position: relative; height: 190px; background: radial-gradient(circle, #3a4454 0%, #111823 100%); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 3px dashed rgba(255,255,255,0.2); overflow: hidden; }
-        .spotlight { position: absolute; top: -50%; left: 50%; width: 200%; height: 200%; background: conic-gradient(from 0deg at 50% 50%, rgba(255,193,7,0.15) 0deg, transparent 30deg, rgba(255,193,7,0.15) 60deg, transparent 90deg, rgba(255,193,7,0.15) 120deg, transparent 150deg); transform: translate(-50%, 0); animation: rotateLight 12s linear infinite; pointer-events: none; z-index: 1; }
-        @keyframes rotateLight { 0% { transform: translate(-50%, 0) rotate(0deg); } 100% { transform: translate(-50%, 0) rotate(360deg); } }
-        .bowl { width: 120px; height: 40px; background: #e0e0e0; border-bottom-left-radius: 60px; border-bottom-right-radius: 60px; border: 3px solid #b0b0b0; display: flex; align-items: center; justify-content: center; z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.6); }
+
+        .stage-container {
+            position: relative; height: 190px;
+            background: radial-gradient(circle, #3a4454 0%, #111823 100%);
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: space-between; padding: 10px 0;
+            border-bottom: 3px dashed rgba(255,255,255,0.2); overflow: hidden;
+        }
+
+        .spotlight {
+            position: absolute; top: -50%; left: 50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(from 0deg at 50% 50%, rgba(255,193,7,0.15) 0deg, transparent 30deg, rgba(255,193,7,0.15) 60deg, transparent 90deg, rgba(255,193,7,0.15) 120deg, transparent 150deg);
+            transform: translate(-50%, 0); animation: rotateLight 12s linear infinite;
+            pointer-events: none; z-index: 1;
+        }
+        @keyframes rotateLight {
+            0% { transform: translate(-50%, 0) rotate(0deg); }
+            100% { transform: translate(-50%, 0) rotate(360deg); }
+        }
+
+        .bowl {
+            width: 120px; height: 40px; background: #e0e0e0;
+            border-bottom-left-radius: 60px; border-bottom-right-radius: 60px;
+            border: 3px solid #b0b0b0; display: flex; align-items: center; justify-content: center;
+            z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
         .bowl-text { font-size: 12px; font-weight: bold; color: #d32f2f; letter-spacing: 2px; }
-        .dancers-stage { position: relative; width: 100%; display: flex; justify-content: space-around; align-items: flex-end; padding: 0 10px; z-index: 4; height: 90px; }
+
+        .dancers-stage {
+            position: relative; width: 100%; display: flex;
+            justify-content: space-around; align-items: flex-end;
+            padding: 0 10px; z-index: 4; height: 90px;
+        }
         .dancer-card { display: flex; flex-direction: column; align-items: center; transform-origin: bottom center; }
-        .dancer-icon { width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 3px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
-        .dancer-label { font-size: 9px; font-weight: bold; margin-top: 3px; background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 4px; color: var(--secondary); }
-        @keyframes danceLeftRight { 0% { transform: translateY(0) rotate(-12deg) scale(0.95); } 50% { transform: translateY(-12px) rotate(0deg) scale(1.1); } 100% { transform: translateY(0) rotate(12deg) scale(0.95); } }
+        .dancer-icon {
+            width: 44px; height: 44px; border-radius: 50%; background: #fff;
+            border: 3px solid var(--primary); display: flex; align-items: center; justify-content: center;
+            font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .dancer-label {
+            font-size: 9px; font-weight: bold; margin-top: 3px;
+            background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 4px; color: var(--secondary);
+        }
+
+        @keyframes danceLeftRight {
+            0% { transform: translateY(0) rotate(-12deg) scale(0.95); }
+            50% { transform: translateY(-12px) rotate(0deg) scale(1.1); }
+            100% { transform: translateY(0) rotate(12deg) scale(0.95); }
+        }
+
         .dancing .dancer-card:nth-child(1) { animation: danceLeftRight 0.4s infinite alternate ease-in-out; }
         .dancing .dancer-card:nth-child(2) { animation: danceLeftRight 0.4s 0.08s infinite alternate ease-in-out; }
         .dancing .dancer-card:nth-child(3) { animation: danceLeftRight 0.4s 0.16s infinite alternate ease-in-out; }
         .dancing .dancer-card:nth-child(4) { animation: danceLeftRight 0.4s 0.24s infinite alternate ease-in-out; }
         .dancing .dancer-card:nth-child(5) { animation: danceLeftRight 0.4s 0.32s infinite alternate ease-in-out; }
-        .play-area { position: relative; flex: 1; display: flex; justify-content: space-between; padding: 0 5px; background: rgba(0,0,0,0.3); overflow: hidden; }
-        .lane { position: relative; width: 19%; height: 100%; background: rgba(255,255,255,0.03); border-left: 1px solid rgba(255,255,255,0.08); border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; align-items: center; }
-        .lane-title { font-size: 9px; font-weight: bold; color: #ffca28; margin-top: 5px; opacity: 0.85; background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 4px; }
-        .target-line { position: absolute; bottom: 130px; width: 100%; height: 6px; background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4; }
-        .note { position: absolute; width: 90%; height: 44px; border-radius: 10px; background: linear-gradient(135deg, rgba(255,152,0,0.9), rgba(245,124,0,0.9)); display: flex; align-items: center; justify-content: center; font-size: 22px; border: 2px solid rgba(255,255,255,0.9); z-index: 5; box-shadow: 0 2px 6px rgba(0,0,0,0.4); top: -50px; }
-        #feedback { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0; transition: opacity 0.1s; text-align: center; white-space: nowrap; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        .control-panel { height: 90px; background: rgba(0,0,0,0.8); display: flex; justify-content: space-around; align-items: center; padding: 0 5px; }
-        .hit-btn { width: 19%; height: 65px; background: linear-gradient(135deg, #ff7043, #d84315); border: 2px solid #ffccbc; border-radius: 10px; color: white; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .hit-btn:active { transform: scale(0.92); background: #bf360c; }
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 25, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; text-align: center; }
-        .btn-main { background: linear-gradient(135deg, #ff9800, #f57c00); color: white; border: none; padding: 14px 35px; font-size: 18px; font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-        .btn-main:active { transform: scale(0.95); }
-        .hidden { display: none !important; }
-        #countdown-overlay { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 56px; font-weight: bold; color: var(--secondary); text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none; }
 
-        /* --- ✨ 新・夕焼けエンディング演出 ✨ --- */
-        #ending-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            /* イラストのような美しい夕焼けのグラデーション */
-            background: linear-gradient(to bottom, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
-            overflow: hidden; z-index: 200; display: flex; flex-direction: column; align-items: center;
+        .play-area {
+            position: relative; flex: 1; display: flex; justify-content: space-between;
+            padding: 0 5px; background: rgba(0,0,0,0.3); overflow: hidden;
         }
-
-        /* 夕日 */
-        .sun {
-            position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
-            width: 100px; height: 100px;
-            background: radial-gradient(circle, #fff 30%, #ffca28 60%, rgba(255,255,255,0) 100%);
-            border-radius: 50%; filter: blur(5px);
+        .lane {
+            position: relative; width: 19%; height: 100%;
+            background: rgba(255,255,255,0.03);
+            border-left: 1px solid rgba(255,255,255,0.08); border-right: 1px solid rgba(255,255,255,0.08);
+            display: flex; flex-direction: column; align-items: center;
         }
-
-        /* 地面（草原） */
-        .ground {
-            position: absolute; bottom: 0; width: 100%; height: 45%;
-            background: linear-gradient(to bottom, #aed581 0%, #558b2f 100%);
+        .lane-title {
+            font-size: 9px; font-weight: bold; color: #ffca28; margin-top: 5px; opacity: 0.85;
+            background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 4px;
         }
-
-        /* 遠くへ続く道（SVG） */
-        .road-container {
-            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; height: 45%; overflow: hidden;
+        .target-line {
+            position: absolute; bottom: 130px; width: 100%; height: 6px;
+            background: var(--secondary); box-shadow: 0 0 12px var(--secondary); z-index: 4;
         }
         
+        .note {
+            position: absolute; width: 90%; height: 44px; border-radius: 10px;
+            background: linear-gradient(135deg, rgba(255,152,0,0.9), rgba(245,124,0,0.9));
+            display: flex; align-items: center; justify-content: center; font-size: 22px;
+            border: 2px solid rgba(255,255,255,0.9); z-index: 5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4); top: -50px;
+        }
+        
+        #feedback {
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 26px; font-weight: bold; pointer-events: none; z-index: 20; opacity: 0;
+            transition: opacity 0.1s; text-align: center; white-space: nowrap;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        .control-panel {
+            height: 90px; background: rgba(0,0,0,0.8);
+            display: flex; justify-content: space-around; align-items: center; padding: 0 5px;
+        }
+        .hit-btn {
+            width: 19%; height: 65px;
+            background: linear-gradient(135deg, #ff7043, #d84315);
+            border: 2px solid #ffccbc; border-radius: 10px;
+            color: white; font-size: 11px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; user-select: none; text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .hit-btn:active { transform: scale(0.92); background: #bf360c; }
+        
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 15, 25, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; padding: 20px; text-align: center;
+        }
+        .btn-main {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white; border: none; padding: 14px 35px;
+            font-size: 18px; font-weight: bold; border-radius: 30px;
+            cursor: pointer; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .btn-main:active { transform: scale(0.95); }
+        .hidden { display: none !important; }
+        
+        #countdown-overlay {
+            position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 56px; font-weight: bold; color: var(--secondary);
+            text-shadow: 0 0 15px rgba(255,193,7,0.8); z-index: 50; pointer-events: none;
+        }
+
+        /* --- 🦊 自然の夕焼け＆四つ足キツネの最新エンディング演出 --- */
+        #ending-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            /* イラストのような美しい夕焼けのグラデーション空 */
+            background: linear-gradient(180deg, #ff6b4a 0%, #ff9e59 40%, #ffc107 70%, #ff8f00 100%);
+            overflow: hidden; z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+        }
+
+        /* 大きな夕日 */
+        .sun {
+            position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 120px; background: radial-gradient(circle, #fff 40%, #ffe082 70%, rgba(255,255,255,0) 100%);
+            border-radius: 50%; box-shadow: 0 0 40px #ffb300; pointer-events: none;
+        }
+
+        /* 流れる白い雲 */
+        .white-cloud {
+            position: absolute; background: #ffffff;
+            border-radius: 30px; opacity: 0.9;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            animation: cloudMove 16s infinite linear; pointer-events: none;
+        }
+        .white-cloud::before, .white-cloud::after {
+            content: ''; position: absolute; background: #ffffff; border-radius: 50%;
+        }
+        .white-cloud::before { width: 40px; height: 40px; top: -18px; left: 15px; }
+        .white-cloud::after { width: 30px; height: 30px; top: -12px; left: 42px; }
+
+        @keyframes cloudMove {
+            0% { transform: translateX(-160px); }
+            100% { transform: translateX(520px); }
+        }
+
+        /* 緑の地面（草原） */
+        .field-bg {
+            position: absolute; bottom: 0; width: 100%; height: 58%;
+            background: linear-gradient(to bottom, #81c784 0%, #388e3c 100%); overflow: hidden;
+        }
+
+        /* 砂の道と流れる点線（右カーブ） */
         .road-svg {
-            width: 100%; height: 100%;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
         }
-
-        /* 動く白線（アニメーション） */
-        .road-dashed-line {
-            stroke: rgba(255,255,255,0.8);
-            stroke-width: 5;
-            stroke-dasharray: 20, 30; /* 線の長さ、間隔 */
-            animation: roadMove 1s infinite linear;
+        .road-line {
+            stroke-dasharray: 12 12;
+            animation: roadMove 0.8s infinite linear;
         }
-
         @keyframes roadMove {
-            to { stroke-dashoffset: -50; } /* 手前に流れる動き */
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -24; }
         }
 
-        /* 走るキツネ（後ろ姿） */
-        .fox-back-view {
-            position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
-            font-size: 80px;  /* イラストに合わせて少し大きめに */
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-            animation: foxRun 0.4s infinite alternate ease-in-out;
+        /* 🐾 四つ足で歩くキツネ（後ろ姿をイラスト風に綺麗に配置＆アニメーション） */
+        .walking-troop {
+            position: absolute; bottom: 100px; left: 50%;
+            transform: translateX(-50%); z-index: 10;
+            display: flex; align-items: center; justify-content: center;
         }
-
-        /* キツネが走っているような上下運動とわずかな傾き */
-        @keyframes foxRun {
-            0% { transform: translateX(-50%) translateY(0) rotate(-2deg); }
-            100% { transform: translateX(-50%) translateY(-10px) rotate(2deg); }
+        .fox-running-art {
+            font-size: 50px; width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            /* キツネが元気に奥へ向かって走っているようなアニメーション */
+            animation: foxRunAnim 0.5s infinite alternate ease-in-out;
         }
-
+        @keyframes foxRunAnim {
+            0% { transform: translateY(0) scale(1) rotate(-1deg); }
+            100% { transform: translateY(-6px) scale(1.04) rotate(1deg); }
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <!-- ゲーム画面のHTML（前回と同じ） -->
         <div class="header">
             <div class="score-box"><div class="label">SCORE</div><div id="score" class="value">0</div></div>
             <div class="combo-box"><div class="label">COMBO</div><div id="combo" class="value">0</div></div>
-            <div class="miss-box"><div class="label">MISS</div><div id="miss-count" class="miss-value">0</div></div>
+            <div class="miss-box"><div class="label">MISS残数</div><div id="miss-left" class="miss-value">20</div></div>
         </div>
+
         <div class="stage-container" id="stage-container">
             <div class="spotlight"></div>
             <div class="bowl"><div class="bowl-text">ヒガシマル</div></div>
+            
             <div class="dancers-stage dancing">
                 <div class="dancer-card"><div class="dancer-icon">🦊</div><div class="dancer-label">きつね</div></div>
                 <div class="dancer-card"><div class="dancer-icon">🦝</div><div class="dancer-label">たぬき</div></div>
@@ -149,143 +260,417 @@
                 <div class="dancer-card"><div class="dancer-icon">🥩</div><div class="dancer-label">おにく</div></div>
             </div>
         </div>
-        <div id="countdown-overlay" class="hidden">3</div>
+
+        <div id="countdown-overlay" class="hidden">8</div>
+
         <div class="play-area">
-            <div class="lane"><div class="lane-title">きつね</div><div class="note-container"></div></div>
-            <div class="lane"><div class="lane-title">たぬき</div><div class="note-container"></div></div>
-            <div class="lane"><div class="lane-title">てんぷら</div><div class="note-container"></div></div>
-            <div class="lane"><div class="lane-title">つきみ</div><div class="note-container"></div></div>
-            <div class="lane"><div class="lane-title">おにく</div><div class="note-container"></div></div>
+            <div class="lane" data-lane="0"><div class="lane-title">きつね</div></div>
+            <div class="lane" data-lane="1"><div class="lane-title">たぬき</div></div>
+            <div class="lane" data-lane="2"><div class="lane-title">てんぷら</div></div>
+            <div class="lane" data-lane="3"><div class="lane-title">つきみ</div></div>
+            <div class="lane" data-lane="4"><div class="lane-title">おにく</div></div>
             <div class="target-line"></div>
-            <div id="feedback">PERFECT</div>
+            <div id="feedback">PERFECT!</div>
         </div>
+
         <div class="control-panel">
-            <button class="hit-btn">きつね</button>
-            <button class="hit-btn">たぬき</button>
-            <button class="hit-btn">てんぷら</button>
-            <button class="hit-btn">つきみ</button>
-            <button class="hit-btn">おにく</button>
+            <button class="hit-btn" data-lane="0">きつね</button>
+            <button class="hit-btn" data-lane="1">たぬき</button>
+            <button class="hit-btn" data-lane="2">てんぷら</button>
+            <button class="hit-btn" data-lane="3">つきみ</button>
+            <button class="hit-btn" data-lane="4">おにく</button>
         </div>
 
         <!-- スタート画面 -->
         <div id="start-screen" class="overlay">
-            <h1 style="color:var(--secondary); margin-bottom:10px;">うどんかぞえうた<br>リズムゲーム</h1>
-            <p style="font-size:14px; color:#ccc; line-height:1.6; max-width: 320px; margin-bottom: 20px;">
-                具材に合わせてリズムよくボタンを押そう！<br>
-                10回ミスするとゲームオーバーです。
+            <h2 style="color:var(--secondary); margin-bottom:5px; font-size: 24px;">✨ うどんかぞえうた ✨</h2>
+            <p style="font-size:11px; color:#ccc; line-height:1.5; max-width: 320px; margin-bottom: 10px;">
+                レーンに一致する具材アイコンが高確率で登場！<br>
+                リズムに合わせて正しくタップしよう！<br>
+                <b>MISSが20回</b>に達するとゲームオーバーです。
             </p>
-            <button class="btn-main" id="start-btn">ゲームスタート</button>
+            <button class="btn-main" id="start-btn">ゲームスタート！</button>
+            <button class="btn-main" id="test-ending-btn" style="background: linear-gradient(135deg, #4caf50, #2e7d32); margin-top: 10px; font-size: 13px; padding: 10px 20px;">🎬 [テスト] エンディングを見る</button>
         </div>
 
-        <!-- ゲームオーバー画面 -->
-        <div id="gameover-screen" class="overlay hidden">
-            <h1 style="color:#f44336;">GAME OVER</h1>
-            <p id="final-score-over" style="font-size:24px; margin: 15px 0;">SCORE: 0</p>
-            <button class="btn-main" id="retry-btn">もう一度プレイ</button>
+        <!-- 結果画面 -->
+        <div id="result-screen" class="overlay hidden">
+            <h2 id="result-title" style="color:var(--secondary); font-size: 24px;">🎉 クリア！おめでとう！ 🎉</h2>
+            <div id="res-score" style="font-size:20px; margin:10px 0; font-weight: bold;">SCORE: 0</div>
+            <div id="res-detail" style="font-size:12px; color:#ccc; margin-bottom:15px; line-height:1.6;"></div>
+            <p id="ending-countdown-msg" style="font-size: 11px; color: #aaa; margin-top: 10px;">5秒後にエンディングへ進みます...</p>
+            <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
-        <!-- ✨ 新・夕焼けエンディング画面 ✨ -->
+        <!-- ✨ 夕焼けエンディング画面（イラストの世界観を完全再現） ✨ -->
         <div id="ending-screen" class="hidden">
+            <!-- 夕日 -->
             <div class="sun"></div>
-            <div class="ground"></div>
-            
-            <!-- 遠近感のある道 -->
-            <div class="road-container">
-                <svg class="road-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <!-- 道本体 -->
-                    <path d="M 45 0 L 55 0 L 100 100 L 0 100 Z" fill="#795548" />
-                    <!-- 動くセンターライン -->
-                    <line x1="50" y1="0" x2="50" y2="100" class="road-dashed-line" />
+
+            <!-- 空の白い雲（アニメーション） -->
+            <div class="white-cloud" style="top: 10%; width: 90px; height: 26px; animation-delay: 0s;"></div>
+            <div class="white-cloud" style="top: 22%; width: 120px; height: 32px; animation-delay: 6s;"></div>
+            <div class="white-cloud" style="top: 15%; width: 85px; height: 24px; animation-delay: 11s;"></div>
+
+            <!-- 緑の草原と右カーブの砂道 -->
+            <div class="field-bg">
+                <svg class="road-svg" viewBox="0 0 480 300" preserveAspectRatio="none">
+                    <!-- 奥へ続く右カーブの砂道 -->
+                    <path d="M 190 0 Q 150 150 380 300 L 110 300 Q 120 150 150 0 Z" fill="#d49a55" />
+                    <!-- 流れる白い車線（走っている臨場感を演出） -->
+                    <path class="road-line" d="M 170 0 Q 135 150 115 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
+                    <path class="road-line" d="M 180 0 Q 142 150 375 300" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.85" />
                 </svg>
             </div>
-            
-            <!-- 走るキツネの後ろ姿（絵文字をCSSでアニメーション） -->
-            <div class="fox-back-view">🦊</div>
-            
-            <div class="overlay" style="background:none; z-index:10; top:auto; bottom:5%; height:auto;">
-                <h2 style="color:var(--secondary); text-shadow:0 2px 4px rgba(0,0,0,0.5);">CLEAR! ありがとう！</h2>
-                <p id="final-score-end" style="font-size:20px; color:#fff; margin: 10px 0;">SCORE: 0</p>
-                <button class="btn-main" id="back-to-title-btn">タイトルへもどる</button>
+
+            <!-- 道の中央を走る、四つ足キツネの後ろ姿アニメーション -->
+            <div class="walking-troop">
+                <div class="fox-running-art">🦊🏃</div>
             </div>
         </div>
     </div>
 
-    <!-- ゲームロジック（前回と同じ、最後にエンディング呼び出しを追加） -->
-    <!-- ※前回のコードと同じため省略していますが、本番のファイルにはすべてのスクリプトを入れてください。 -->
     <script>
-        // --- 変数定義、音声、初期化、ノート生成、判定等は前回と同じ ---
-        const INGREDIENTS = ["🦊", "🦝", "🍤", "🥚", "🥩"];
-        let score = 0, combo = 0, missCount = 0, gameActive = false, startTime, activeNotes = [], noteIdCounter = 0;
-        const TARGET_Y = 660, PERFECT_RANGE = 20, GOOD_RANGE = 50, NOTE_SPEED = 4;
-        const totalUdonDuration = 120; // udon.mp3の長さ（秒）。適宜調整。
+        const INGREDIENTS = [
+            { name: "きつね", icon: "🦊" },
+            { name: "たぬき", icon: "🦝" },
+            { name: "てんぷら", icon: "🍤" },
+            { name: "つきみ", icon: "🥚" },
+            { name: "おにく", icon: "🥩" }
+        ];
+        
+        const START_DELAY = 10.0; 
+        const TOTAL_GAME_DURATION = 135.0;
+        const MAX_MISS_ALLOWED = 20;
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const udonAudio = new Audio('udon.mp3');
-        const endingAudio = new Audio('ending.mp3');
+        let score = 0, combo = 0, missCount = 0;
+        let perfectCount = 0, goodCount = 0;
+        let gameActive = false, isCountingDown = false;
+        let startTime = 0;
+        let activeNotes = [], countdownTimer = null, animId = null;
+        let resultTimeout = null;
+        
+        const bgm = new Audio();
+        bgm.volume = 0.9;
+        
+        const lanes = document.querySelectorAll('.lane');
 
-        // 音声アンロック用処理
         function unlockAudio() {
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            udonAudio.play().then(() => udonAudio.pause()).catch(e => console.error(e));
-            endingAudio.play().then(() => endingAudio.pause()).catch(e => console.error(e));
+            bgm.src = 'udon.mp3';
+            bgm.load();
+            bgm.play().then(() => {
+                bgm.pause();
+                bgm.currentTime = 0;
+            }).catch(() => {});
             document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
         }
         document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
 
-        // ゲームクリア（エンディング）を呼び出す処理
-        function gameClear() {
-            gameActive = false;
-            udonAudio.pause();
-            
-            // エンディング音楽を再生
-            endingAudio.currentTime = 0;
-            endingAudio.play().catch(e => console.error("endingAudio.play error:", e));
+        let audioCtx = null;
+        function playSound(type) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
 
-            document.getElementById('final-score-end').innerText = `SCORE: ${score}`;
-            document.getElementById('ending-screen').classList.remove('hidden');
+                const now = audioCtx.currentTime;
+                if (type === 'perfect') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880.00, now);
+                    osc.frequency.setValueAtTime(1318.51, now + 0.08);
+                    gain.gain.setValueAtTime(0.6, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'good') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    gain.gain.setValueAtTime(0.65, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(110, now);
+                    osc.frequency.setValueAtTime(70, now + 0.12);
+                    gain.gain.setValueAtTime(0.7, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            } catch (e) {
+                console.log(e);
+            }
         }
 
-        // --- ゲームメインループ、スタート、オーバー等の関数は前回と同じ ---
-        // (省略) ... updateGame関数内のクリア判定部分 ...
+        function generateRandomTimings() {
+            let timings = [];
+            let currentTime = 0.0;
+            while (currentTime < 125.0) {
+                const randomLane = Math.floor(Math.random() * 5);
+                let noteType;
+                if (Math.random() < 0.80) {
+                    noteType = randomLane;
+                } else {
+                    let otherTypes = [0, 1, 2, 3, 4].filter(t => t !== randomLane);
+                    noteType = otherTypes[Math.floor(Math.random() * otherTypes.length)];
+                }
+                timings.push({ t: currentTime, lane: randomLane, type: noteType });
+                currentTime += 0.9 + Math.random() * 0.6;
+            }
+            return timings;
+        }
+
+        function triggerEnding() {
+            gameActive = false;
+            isCountingDown = false;
+            cancelAnimationFrame(animId);
+            if (countdownTimer) clearInterval(countdownTimer);
+            if (resultTimeout) clearTimeout(resultTimeout);
+            
+            bgm.pause();
+            bgm.currentTime = 0;
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('ending-screen').classList.remove('hidden');
+            
+            bgm.src = 'ending.mp3';
+            bgm.volume = 0.8;
+            bgm.currentTime = 0;
+            bgm.play().catch(err => {
+                console.log("ending.mp3再生エラー:", err);
+            });
+        }
+
+        function startGame() {
+            score = 0; combo = 0; missCount = 0;
+            perfectCount = 0; goodCount = 0;
+            if (resultTimeout) clearTimeout(resultTimeout);
+
+            document.getElementById('score').innerText = '0';
+            document.getElementById('combo').innerText = '0';
+            document.getElementById('miss-left').innerText = MAX_MISS_ALLOWED;
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('ending-screen').classList.add('hidden');
+
+            document.querySelectorAll('.note').forEach(el => el.remove());
+
+            const rawTimings = generateRandomTimings();
+            activeNotes = rawTimings.map((item, index) => {
+                const targetTime = START_DELAY + item.t;
+                const el = document.createElement('div');
+                el.className = 'note';
+                el.innerText = INGREDIENTS[item.type].icon;
+                lanes[item.lane].appendChild(el);
+                return { id: index, el: el, removed: false, lane: item.lane, type: item.type, targetTime: targetTime };
+            });
+
+            bgm.src = 'udon.mp3';
+            bgm.volume = 0.9;
+            bgm.currentTime = 0;
+            bgm.play().catch(err => {
+                console.log("udon.mp3再生エラー:", err);
+            });
+
+            const cdEl = document.getElementById('countdown-overlay');
+            cdEl.classList.remove('hidden');
+            let timeLeft = 8;
+            cdEl.innerText = timeLeft;
+            isCountingDown = true; 
+
+            if (countdownTimer) clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    cdEl.innerText = timeLeft;
+                } else {
+                    cdEl.innerText = "START!";
+                    isCountingDown = false; 
+                    setTimeout(() => cdEl.classList.add('hidden'), 600);
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+
+            gameActive = true;
+            startTime = performance.now();
+            updateGame();
+        }
+
         function updateGame() {
             if (!gameActive) return;
-            const currentTime = audioCtx.currentTime;
-            const elapsedSinceStart = currentTime - startTime;
+            const elapsed = (performance.now() - startTime) / 1000;
+            const playAreaHeight = lanes[0].clientHeight;
+            const fallDuration = 2.0;
+            const targetLineBottom = 130; 
 
-            // 具材ノートの移動と削除
-            activeNotes.forEach(note => {
-                note.y += NOTE_SPEED;
-                note.element.style.transform = `translateY(${note.y}px)`;
-                if (note.y > TARGET_Y + GOOD_RANGE) {
-                    note.element.remove();
-                    note.isMissed = true;
-                    handleMiss();
+            let allCleared = true;
+
+            activeNotes.forEach((obj) => {
+                if (!obj.removed) {
+                    allCleared = false;
+                    const dropStartTime = obj.targetTime - fallDuration;
+
+                    if (elapsed >= dropStartTime) {
+                        const progress = (elapsed - dropStartTime) / fallDuration;
+                        const totalTravel = playAreaHeight - targetLineBottom;
+                        const currentTop = progress * totalTravel;
+
+                        if (progress <= 1.4) {
+                            obj.el.style.top = currentTop + 'px';
+                        }
+                    }
+
+                    const targetLinePixelFromTop = playAreaHeight - targetLineBottom;
+                    const noteTop = parseFloat(obj.el.style.top) || -50;
+                    const noteBottom = noteTop + 44;
+
+                    if (noteBottom > targetLinePixelFromTop + 60) {
+                        obj.removed = true;
+                        obj.el.remove();
+                        if (obj.type === obj.lane) {
+                            handleMiss();
+                        }
+                    }
                 }
             });
-            activeNotes = activeNotes.filter(note => !note.isMissed);
 
-            // ミス回数によるゲームオーバー判定
-            if (missCount >= 10) { gameOver(); return; }
-
-            // ⚽ 曲が最後まで流れたらクリア判定 ⚽
-            if (elapsedSinceStart >= totalUdonDuration) {
-                gameClear();
+            if (missCount >= MAX_MISS_ALLOWED || elapsed >= TOTAL_GAME_DURATION) {
+                endGame(missCount < MAX_MISS_ALLOWED);
                 return;
             }
 
-            requestAnimationFrame(updateGame);
+            if (allCleared && elapsed > START_DELAY) {
+                endGame(true);
+                return;
+            }
+
+            animId = requestAnimationFrame(updateGame);
         }
-        // (省略) ... その他の関数 ...
-        
-        // スタート、リトライ、タイトルへ戻るボタンのイベント
-        document.getElementById('start-btn').addEventListener('click', startGame);
-        document.getElementById('retry-btn').addEventListener('click', startGame);
-        document.getElementById('back-to-title-btn').addEventListener('click', () => {
-            endingAudio.pause();
-            document.getElementById('ending-screen').classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
+
+        function judgeLane(laneIndex) {
+            if (!gameActive || isCountingDown) return;
+            
+            const playAreaHeight = lanes[0].clientHeight;
+            const targetLinePixelFromTop = playAreaHeight - 130; 
+            let hitFound = false;
+
+            for (let obj of activeNotes) {
+                if (obj.lane === laneIndex && !obj.removed) {
+                    const noteTop = parseFloat(obj.el.style.top) || -50;
+                    const noteCenter = noteTop + 22; 
+                    const targetCenter = targetLinePixelFromTop + 3; 
+                    const distance = noteCenter - targetCenter; 
+                    const absDistance = Math.abs(distance);
+
+                    if (absDistance <= 45) {
+                        hitFound = true;
+                        obj.removed = true; 
+                        obj.el.remove();    
+
+                        if (obj.type === laneIndex) {
+                            if (absDistance <= 12) {
+                                score += 300; combo++;
+                                perfectCount++;
+                                showFeedback('PERFECT!', '#ffeb3b');
+                                playSound('perfect');
+                            } else {
+                                score += 100; combo++;
+                                goodCount++;
+                                showFeedback('GOOD', '#8bc34a');
+                                playSound('good');
+                            }
+                            document.getElementById('score').innerText = score;
+                            document.getElementById('combo').innerText = combo;
+                        } else {
+                            handleMiss();
+                        }
+                        break; 
+                    }
+                }
+            }
+
+            if (!hitFound) {
+                handleMiss();
+            }
+        }
+
+        function handleMiss() {
+            combo = 0;
+            missCount++;
+            const left = MAX_MISS_ALLOWED - missCount;
+            document.getElementById('combo').innerText = combo;
+            document.getElementById('miss-left').innerText = Math.max(0, left);
+            showFeedback('MISS', '#f44336');
+            playSound('miss');
+        }
+
+        function showFeedback(text, color) {
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.innerText = text;
+            feedbackEl.style.color = color;
+            feedbackEl.style.opacity = '1';
+            setTimeout(() => feedbackEl.style.opacity = '0', 300);
+        }
+
+        function endGame(isClear) {
+            gameActive = false;
+            isCountingDown = false;
+            cancelAnimationFrame(animId);
+            if (countdownTimer) clearInterval(countdownTimer);
+            bgm.pause();
+
+            const titleEl = document.getElementById('result-title');
+            const detailEl = document.getElementById('res-detail');
+
+            if (isClear) {
+                titleEl.innerText = '🎉 曲を完走！おめでとう！ 🎉';
+                titleEl.style.color = '#ffc107';
+            } else {
+                titleEl.innerText = '😭 残念！もう一度チャレンジしてね！ 😭';
+                titleEl.style.color = '#f44336';
+            }
+
+            detailEl.innerHTML = `
+                PERFECT: ${perfectCount}回<br>
+                GOOD: ${goodCount}回<br>
+                MISS: ${missCount}回
+            `;
+
+            document.getElementById('res-score').innerText = 'SCORE: ' + score;
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            resultTimeout = setTimeout(() => {
+                triggerEnding();
+            }, 5000);
+        }
+
+        document.querySelectorAll('.hit-btn').forEach(btn => {
+            const lane = parseInt(btn.getAttribute('data-lane'));
+            btn.addEventListener('click', () => judgeLane(lane));
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                judgeLane(lane);
+            });
         });
 
+        document.getElementById('start-btn').addEventListener('click', () => {
+            startGame();
+        });
+        document.getElementById('test-ending-btn').addEventListener('click', () => {
+            triggerEnding();
+        });
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            startGame();
+        });
     </script>
 </body>
 </html>
