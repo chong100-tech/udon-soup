@@ -171,13 +171,12 @@
         /* --- 🎬 エンディング画面（ending-bg のみが背景となり、その前面にクレジットが流れる） --- */
         #ending-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            /* プレイ画面を完全に覆うため、単色ベース＋ending-bg全体表示（contain）に設定 */
             background-color: #111;
             background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('ending-bg.jpg');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center center;
-            overflow: hidden; z-index: 300; /* プレイ画面の上に完全に被せる */
+            overflow: hidden; z-index: 300;
         }
 
         /* クレジット表示枠（下部） */
@@ -189,12 +188,11 @@
             height: 200px;
             overflow: hidden;
             z-index: 310;
-            /* 上部に向かって自然にフェードアウトするマスク処理 */
             -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 100%);
             mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 100%);
         }
 
-        /* 100秒かけてゆっくり上へ動くクレジット本体 */
+        /* クレジット本体 */
         #credit-content {
             position: absolute;
             width: 100%;
@@ -299,7 +297,7 @@
             <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
-        <!-- エンディング画面（ending-bgのみ背景＋前面クレジット） -->
+        <!-- エンディング画面 -->
         <div id="ending-screen" class="hidden">
             <div id="credit-box">
                 <div id="credit-content">
@@ -344,7 +342,7 @@
         ];
 
         const START_DELAY = 10.0; 
-        const TOTAL_GAME_DURATION = 137.0;
+        const TOTAL_GAME_DURATION = 137.0; // ゲーム全体の演奏時間（秒）
         const MAX_MISS_ALLOWED = 20;
 
         let score = 0, combo = 0, missCount = 0;
@@ -413,10 +411,12 @@
             }
         }
 
+        /* 137秒の楽曲に合わせてノーツ（おかず）をしっかり生成 */
         function generateRandomTimings() {
             let timings = [];
             let currentTime = 0.0;
-            while (currentTime < 125.0) {
+            const maxNoteTime = TOTAL_GAME_DURATION - START_DELAY - 3.0; // 演奏終了直前まで生成
+            while (currentTime < maxNoteTime) {
                 const randomLane = Math.floor(Math.random() * 5);
                 let noteType;
                 if (Math.random() < 0.80) {
@@ -445,7 +445,6 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('ending-screen').classList.remove('hidden');
 
-            // クレジットのスクロールアニメーションを開始（100秒で出し切る）
             const creditContent = document.getElementById('credit-content');
             creditContent.classList.remove('scrolling');
             void creditContent.offsetWidth;
@@ -522,11 +521,8 @@
             const fallDuration = 2.0;
             const targetLineBottom = 130; 
 
-            let allCleared = true;
-
             activeNotes.forEach((obj) => {
                 if (!obj.removed) {
-                    allCleared = false;
                     const dropStartTime = obj.targetTime - fallDuration;
 
                     if (elapsed >= dropStartTime) {
@@ -553,17 +549,14 @@
                 }
             });
 
+            /* 設定された制限時間（137秒）経過、またはMISS制限オーバーでゲーム終了 */
             if (missCount >= MAX_MISS_ALLOWED || elapsed >= TOTAL_GAME_DURATION) {
                 endGame(missCount < MAX_MISS_ALLOWED);
                 return;
             }
 
-        /* --- ❌ ここをコメントアウト（または削除） ---
-            if (allCleared && elapsed > START_DELAY) {
-                endGame(true);
-                return;
-            }
-            ------------------------------------------------ */
+            animId = requestAnimationFrame(updateGame);
+        }
 
         function judgeLane(laneIndex) {
             if (!gameActive || isCountingDown) return;
@@ -673,9 +666,6 @@
 
         document.getElementById('start-btn').addEventListener('click', () => {
             startGame();
-        });
-        document.getElementById('test-ending-btn').addEventListener('click', () => {
-            triggerEnding();
         });
         document.getElementById('restart-btn').addEventListener('click', () => {
             startGame();
