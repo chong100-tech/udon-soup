@@ -344,7 +344,7 @@
         ];
 
         const START_DELAY = 10.0; 
-        const TOTAL_GAME_DURATION = 140.0;
+        const TOTAL_GAME_DURATION = 137.0;
         const MAX_MISS_ALLOWED = 20;
 
         let score = 0, combo = 0, missCount = 0;
@@ -558,13 +558,12 @@
                 return;
             }
 
+        /* --- ❌ ここをコメントアウト（または削除） ---
             if (allCleared && elapsed > START_DELAY) {
                 endGame(true);
                 return;
             }
-
-            animId = requestAnimationFrame(updateGame);
-        }
+            ------------------------------------------------ */
 
         function judgeLane(laneIndex) {
             if (!gameActive || isCountingDown) return;
