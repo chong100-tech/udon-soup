@@ -81,7 +81,6 @@
             border: 3px solid var(--primary); display: flex; align-items: center; justify-content: center;
             font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
-        /* おかずの名前表記は削除しました */
 
         @keyframes danceLeftRight {
             0% { transform: translateY(0) rotate(-12deg) scale(0.95); }
@@ -115,7 +114,7 @@
             transition: box-shadow 0.1s, background-color 0.1s;
         }
 
-        /* プロセカ風の光るターゲットライン演出エフェクト */
+        /* プロセカ風の光るターゲットライン演出 */
         .target-line.glow-perfect {
             background: #ffffff !important;
             box-shadow: 0 0 25px #00e5ff, 0 0 50px #00e5ff, 0 0 10px #ffffff !important;
@@ -285,13 +284,11 @@
             <button class="btn-main" id="start-btn">ゲームスタート！</button>
         </div>
 
-        <!-- 結果画面 -->
+        <!-- 結果画面（メッセージ・ボタン削除） -->
         <div id="result-screen" class="overlay hidden">
             <h2 id="result-title" style="color:var(--secondary); font-size: 24px;">🎉 クリア！おめでとう！ 🎉</h2>
             <div id="res-score" style="font-size:20px; margin:10px 0; font-weight: bold;">SCORE: 0</div>
             <div id="res-detail" style="font-size:12px; color:#ccc; margin-bottom:15px; line-height:1.6;"></div>
-            <p id="ending-countdown-msg" style="font-size: 11px; color: #aaa; margin-top: 10px;">5秒後にエンディングへ進みます...</p>
-            <button class="btn-main" id="restart-btn" style="margin-top: 10px; padding: 10px 20px; font-size: 14px;">もう一度プレイ</button>
         </div>
 
         <!-- エンディング画面 -->
@@ -375,7 +372,6 @@
         document.addEventListener('click', unlockAudio);
         document.addEventListener('touchstart', unlockAudio);
 
-        /* 効果音を大きく調整済み（gain値を高めに設定） */
         function playSound(type) {
             try {
                 if (!audioCtx) {
@@ -394,14 +390,14 @@
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(880.00, now);
                     osc.frequency.setValueAtTime(1318.51, now + 0.08);
-                    gain.gain.setValueAtTime(0.85, now); /* 音量調整箇所 */
+                    gain.gain.setValueAtTime(0.85, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
                     osc.start(now);
                     osc.stop(now + 0.3);
                 } else if (type === 'good') {
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(523.25, now);
-                    gain.gain.setValueAtTime(0.85, now); /* 音量調整箇所 */
+                    gain.gain.setValueAtTime(0.85, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
                     osc.start(now);
                     osc.stop(now + 0.25);
@@ -409,7 +405,7 @@
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(110, now);
                     osc.frequency.setValueAtTime(70, now + 0.12);
-                    gain.gain.setValueAtTime(0.9, now); /* 音量調整箇所 */
+                    gain.gain.setValueAtTime(0.9, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
                     osc.start(now);
                     osc.stop(now + 0.35);
@@ -419,7 +415,11 @@
             }
         }
 
-        /* 1:38秒（98秒）経過後はノーツの生成間隔を1.5倍（約0.6倍のウェイト）にして物量を増やす */
+        /* 
+          生成ロジック：
+          - 1分20秒 (80秒) 過ぎから1.5倍に増加
+          - 1分38秒 (98秒) 過ぎから2倍に増加
+        */
         function generateRandomTimings() {
             let timings = [];
             let currentTime = 0.0;
@@ -435,10 +435,11 @@
                 }
                 timings.push({ t: currentTime, lane: randomLane, type: noteType });
 
-                // 1:38 (98秒) を超えたら間隔を短く（1.5倍の量にするためintervalを短縮）
                 let interval = 0.9 + Math.random() * 0.6;
                 if (currentTime >= 98.0) {
-                    interval /= 1.5; 
+                    interval /= 2.0; // 1分38秒以降：2倍の物量
+                } else if (currentTime >= 80.0) {
+                    interval /= 1.5; // 1分20秒以降：1.5倍の物量
                 }
                 currentTime += interval;
             }
@@ -465,7 +466,7 @@
             creditContent.classList.add('scrolling');
 
             bgm.src = 'ending.mp3';
-            bgm.volume = 0.8;
+            bgm.volume = 0.9; // ← ending.mp3の音量 (最大1.0)
             bgm.currentTime = 0;
             bgm.play().catch(err => {
                 console.log("ending.mp3再生エラー:", err);
@@ -602,7 +603,7 @@
                             if (absDistance <= 12) {
                                 score += 300; combo++;
                                 perfectCount++;
-                                showFeedback('PERFECT!', '#00e5ff', true); // プロセカ風の光る演出
+                                showFeedback('PERFECT!', '#00e5ff', true);
                                 playSound('perfect');
                             } else {
                                 score += 100; combo++;
@@ -635,7 +636,6 @@
             playSound('miss');
         }
 
-        /* プロセカ風エフェクト付きフィードバック表示関数 */
         function showFeedback(text, color, isPerfect) {
             const feedbackEl = document.getElementById('feedback');
             const targetLine = document.getElementById('target-line');
@@ -685,9 +685,10 @@
             document.getElementById('res-score').innerText = 'SCORE: ' + score;
             document.getElementById('result-screen').classList.remove('hidden');
 
+            // 結果表示後、すぐに（1秒未満で）エンディングへ自動移行
             resultTimeout = setTimeout(() => {
                 triggerEnding();
-            }, 5000);
+            }, 1200);
         }
 
         document.querySelectorAll('.hit-btn').forEach(btn => {
@@ -700,9 +701,6 @@
         });
 
         document.getElementById('start-btn').addEventListener('click', () => {
-            startGame();
-        });
-        document.getElementById('restart-btn').addEventListener('click', () => {
             startGame();
         });
     </script>
